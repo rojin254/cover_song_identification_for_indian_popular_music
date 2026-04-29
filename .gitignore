@@ -1,0 +1,77 @@
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Native extensions and build outputs
+*.so
+.Python
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Test, type-check, lint, and coverage caches
+.coverage
+.coverage.*
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.tox/
+.nox/
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and runtime files
+*.log
+*.out
+*.err
+*.pid
+
+# Model checkpoints and other large training artifacts
+# check_points/
+# *.pth
+# *.pt
+# *.ckpt
+
+# Generated CQT/features and other array dumps
+**/cqt_features/
+*.npy
+*.npz
+
+# Dataset media and raw split folders
+data/train/
+data/test/
+*.mp3
+*.wav
+*.flac
+*.m4a
+*.ogg
+*.npy
+# *.pth
+
+# Local OS files
+.DS_Store
+Thumbs.db

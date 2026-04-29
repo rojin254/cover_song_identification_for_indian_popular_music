@@ -10,38 +10,28 @@ import torch.nn.functional as F
 
 class IndianCoverCQT(Dataset):
     def __init__(self, mode='train', out_length=None):
-        # Changes the file paths for Vocal Separated Data
-        self.indir = '../CoverSongDetection_Timothy/IndianCover_cqt_npy'
+        self.indir = 'indian_new_pipeline/cqt_features'
         self.mode = mode
         if self.mode=='train':
-          self.filepath = 'data/coversIndian_augmented_train_val.txt'
+          self.filepath = 'indian_new_pipeline/indian_train.txt'
           self.set = 0
           self.set_dict = {}
         elif self.mode=='val':
-          self.filepath = 'data/coversIndian_augmented_train_val.txt'
+          self.filepath = 'indian_new_pipeline/indian_train.txt'
         else:
-          self.filepath = 'data/coversIndian_test.txt'
-        #"""
-        with open(self.filepath, 'r') as fp:
-            self.file_list = []
-            for line in fp:
-                stripped = line.rstrip()
-                suffix = stripped.split('_')[-1]
-                if suffix.startswith("Cover") or suffix == "Original":
-                    self.file_list.append(stripped)
-        # Uncomment original implementation to add full list:
-        """
+          self.filepath = 'indian_new_pipeline/indian_test.txt'
+        
         with open(self.filepath, 'r') as fp:
             self.file_list = [line.rstrip() for line in fp]
-        """
         self.out_length = out_length
 
     def __len__(self):
         return len(self.file_list)
 
     def __getitem__(self, index):
-        filename = self.file_list[index].strip()
-        set_id = filename.split('_')[0]  # Assuming the set_id is the first part before '_'
+        line_parts = self.file_list[index].strip().split(',')
+        filename = line_parts[0]
+        set_id = line_parts[1] if len(line_parts) > 1 else filename.split('-')[0]
         if self.mode == 'train':
             if set_id in self.set_dict:
                 set_id = self.set_dict[set_id]
@@ -62,7 +52,8 @@ class IndianCoverCQT(Dataset):
         data = transform_test(data)
         data = self.pad_or_truncate(data, 400, 84)
         
-        return data, int(set_id)
+        is_original = filename.endswith('-o') or '-o-' in filename
+        return data, int(set_id), is_original
 
     # Including necessary methods from the CQT class
     def pad_or_truncate(self, data, target_length, target_freq=84):

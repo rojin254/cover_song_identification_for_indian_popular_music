@@ -19,15 +19,17 @@ random.seed(0)
 def custom_collate(batch):
     data = [item[0] for item in batch]
     labels = [item[1] for item in batch]
+    is_orig = [item[2] for item in batch]
     data = torch.stack(data)
     labels = torch.LongTensor(labels)
-    return data, labels
+    is_orig = torch.BoolTensor(is_orig)
+    return data, labels, is_orig
 
 def transfer_learning(**kwargs):
     opt.batch_size = 60
     opt.num_workers = 2
     opt.model = 'CQTNet'
-    opt.load_model_path = '../CoverSongDetection_Timothy/CQTNet_SpecAugment_x3.pth'
+    opt.load_model_path = 'check_points/cqtnet_indian_best.pth'
     # opt.load_model_path = '/content/CQTNet/check_points/latest.pth'
     opt.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     opt._parse(kwargs)
@@ -35,11 +37,10 @@ def transfer_learning(**kwargs):
 
     # Load pre-trained model
     model = getattr(models, opt.model)()
+    # Modify the last layer to no:of labels in our dataset before loading
+    model.fc1 = nn.Linear(300, 402).to(opt.device)
     model.load(opt.load_model_path)
     model = model.to(opt.device)
-
-    # Modify the last layer to no:of labels in our dataset
-    model.fc1 = nn.Linear(300, 126).to(opt.device)
 
     # Only 1st conv layer frozen
     for name, param in model.named_parameters():
@@ -68,16 +69,17 @@ def transfer_learning(**kwargs):
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-4)
 
     # Training loop
-    num_epochs = 200
+    skip_transfer = kwargs.get('skip_transfer', False)
+    num_epochs = 200 if not skip_transfer else 0
     best_val_map = 0
-    best_model_path = None
+    best_model_path = opt.load_model_path if skip_transfer else None
     early_stop = 0
     early_stop_patience = 25
 
     for epoch in range(num_epochs):
         model.train()
         total_loss = 0
-        for inputs, labels in tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}"):
+        for inputs, labels, is_orig in tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}"):
             inputs, labels = inputs.to(opt.device), labels.to(opt.device)
 
             optimizer.zero_grad()
@@ -135,11 +137,11 @@ def fine_tune_model(model, optimizer, train_loader, val_loader, test_loader, opt
     for epoch in range(num_epochs):
         model.train()
         total_loss = 0
-        for inputs, labels in tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}"):
-            inputs, labels = inputs.to(opt.device), labels.to(opt.device)
+        for inputs, labels, is_orig in tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}"):
+            inputs, labels, is_orig = inputs.to(opt.device), labels.to(opt.device), is_orig.to(opt.device)
             _, embeddings = model(inputs)
             # Create triplets
-            anchor, positive, negative = create_triplets(embeddings, labels)
+            anchor, positive, negative = create_triplets(embeddings, labels, is_orig)
             if anchor.size(0) > 0:  # Check if we have valid triplets
                 loss = criterion(anchor, positive, negative)
                 total_loss += loss.item()
@@ -200,50 +202,39 @@ def pad_or_truncate(data, target_length, target_freq=84):
         data = F.pad(data, (0, pad_time), mode='constant', value=0)
     return data
 
-def create_triplets(embeddings, labels):
+def create_triplets(embeddings, labels, is_orig):
     """
     Create triplets for triplet loss.
-    For each anchor, select:
-      - a positive (same label) with the maximum distance (hard positive)
-      - a negative (different label) with the minimum distance (hard negative)
+    For each original track (anchor), select:
+      - a random positive (cover)
+      - a random negative
     """
-    triplets = []
-    for i in range(len(embeddings)):
-        if (i+1)%6 == 0:
-            anchor = embeddings[i].unsqueeze(0)
-            pos_indices = (labels == labels[i]).nonzero().squeeze()
-            neg_indices = (labels != labels[i]).nonzero().squeeze()
-            
-            # Ensure indices are at least 1D tensors
-            if pos_indices.dim() == 0:
-                pos_indices = pos_indices.unsqueeze(0)
-            if neg_indices.dim() == 0:
-                neg_indices = neg_indices.unsqueeze(0)
-            
-            # Exclude the anchor itself from the positive indices.
-            pos_indices = pos_indices[pos_indices != i]
-
-            neg_candidates = embeddings[neg_indices]
-            # Compute distances between the anchor and all negative candidates.
-            neg_dists = torch.norm(anchor - neg_candidates, dim=1)
-            # Hard negative: the one with the minimum distance.
-            neg_idx = torch.argmin(neg_dists).item()
-            negative = embeddings[neg_indices[neg_idx]].unsqueeze(0) + embeddings[neg_indices[random.randint(0,len(neg_indices)-1)]].unsqueeze(0) #(N_min + N_random)
-
-            for pi in range(len(pos_indices)):
-                if len(pos_indices) > 0 and len(neg_indices) > 0:
-                    # Get candidate embeddings from the full dataset.
-                    pos_candidates = embeddings[pos_indices]
-                    positive = embeddings[pos_indices[pi]].unsqueeze(0) + embeddings[pos_indices[pi]].unsqueeze(0) #(2*P)
-                    triplets.append((anchor, positive, negative))
+    anchors = []
+    positives = []
+    negatives = []
     
-    if triplets:
-        anchors, positives, negatives = zip(*triplets)
-        return (torch.cat(anchors).to(opt.device), 
-                torch.cat(positives).to(opt.device), 
-                torch.cat(negatives).to(opt.device))
-    else:
-        return embeddings[0].unsqueeze(0), embeddings[0].unsqueeze(0), embeddings[0].unsqueeze(0)
+    for i in range(len(embeddings)):
+        if is_orig[i]:
+            anchor = embeddings[i].unsqueeze(0)
+            anchor_label = labels[i]
+            
+            pos_indices = torch.where((labels == anchor_label) & (~is_orig))[0]
+            neg_indices = torch.where(labels != anchor_label)[0]
+            
+            if len(pos_indices) == 0 or len(neg_indices) == 0:
+                continue
+                
+            pos_idx = pos_indices[torch.randint(0, len(pos_indices), (1,)).item()]
+            neg_idx = neg_indices[torch.randint(0, len(neg_indices), (1,)).item()]
+            
+            anchors.append(anchor)
+            positives.append(embeddings[pos_idx].unsqueeze(0))
+            negatives.append(embeddings[neg_idx].unsqueeze(0))
+            
+    if len(anchors) == 0:
+        return torch.tensor([]).to(opt.device), torch.tensor([]).to(opt.device), torch.tensor([]).to(opt.device)
+
+    return torch.cat(anchors).to(opt.device), torch.cat(positives).to(opt.device), torch.cat(negatives).to(opt.device)
 
 
 @torch.no_grad()
@@ -252,7 +243,7 @@ def val_slow(model, dataloader, epoch, dataset_name=None):
     all_embeddings = []
     all_labels = []
 
-    for data, label in tqdm(dataloader, desc=f"Evaluating {dataset_name}"):
+    for data, label, _ in tqdm(dataloader, desc=f"Evaluating {dataset_name}"):
         input = data.to(opt.device)
         _, embedding = model(input)
         all_embeddings.append(embedding.cpu().numpy())
