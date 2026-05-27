@@ -1,0 +1,193 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage{adjustbox}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+% Configuring font package last
+\usepackage{times}
+\usepackage{url}
+
+\title{Cover Song Identification: Phase 4 Interim Report}
+
+\author{
+    \IEEEauthorblockN{Rojin Raju \\ Guided by: Dr. Joe Cheri Ross}
+    \IEEEauthorblockA{\textit{National Institute of Technology, Calicut}}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Indian popular music, characterized by distinct melodic structures and vocal styles, presents additional challenges for cover song identification. While Indian cover versions exhibit culture-specific traits, they also retain musically invariant relations between originals and covers. Motivated by this observation, this report studies the adaptation of CQTNet, a state-of-the-art cover song identification model pre-trained on a large Western cover-song dataset, to Indian popular music. We investigate fine-tuning on CoversIndian, vocal separation to emphasize melodic identity, data augmentation to address data scarcity, and both standard and modified triplet-loss objectives for improving the retrieval space. The experiments show that fine-tuning consistently improves Indian cover retrieval, vocal separation is especially beneficial for Indian songs, and the modified triplet formulation yields the strongest gains among the metric-learning variants.
+\end{abstract}
+
+
+\section{Introduction}
+Indian popular music, with its strong melodic identity and distinctive vocal practices, presents a compelling setting for cover song identification. Cover versions in this tradition often preserve the central melodic line even when tempo, instrumentation, arrangement, or production style change substantially. This makes the task both challenging and musically informative: a successful system must focus on the features that remain stable across renditions while ignoring superficial acoustic variation.
+
+Most successful cover-song identification methods have been developed and evaluated on Western music. As a result, their underlying assumptions are often shaped by Western notions of similarity, where harmony, accompaniment patterns, and production characteristics contribute strongly to the identity of a song. Indian popular music, however, places greater emphasis on the main vocal melody, ornamentation, and stylistic phrasing. These characteristics motivate a separate investigation into whether existing cover-song identification methods can transfer effectively to this musical culture.
+
+This report follows the same broad motivation as the ISMIR study on adapting cover-song identification to Indian popular music. We begin with CQTNet as the baseline model because it is one of the strongest and most widely studied deep learning methods for cover-song retrieval. We then examine whether a Western pre-trained model can be improved through fine-tuning on CoversIndian, whether vocal separation helps the model focus on the most relevant similarity cues, and whether metric-learning objectives such as triplet loss and modified triplet loss yield a better retrieval space. These experiments are intended to answer two central questions: whether Indian cover-song identification benefits from domain-specific adaptation, and whether the unique properties of Indian popular music call for culturally informed modeling choices.
+
+\section{Problem Statement}
+This study focuses on evaluating the applicability of established cover song identification (CSI) methods to Indian cover songs. Early experiments with models like ByteCover and TPPNet on the current Indian covers dataset revealed that the dataset size and quality were insufficient to draw trustworthy inferences regarding model performance on Indian music. The primary problem addressed in this report is the scarcity of a large-scale, validated Indian cover song dataset. Furthermore, the manual validation of thousands of potential covers is prohibitively time-consuming, necessitating the development of automated validation frameworks that can distinguish between valid covers, exact re-uploads, and unrelated tracks.
+
+\section{Literature Survey}
+Our research builds upon two seminal works in cover song identification (CSI) that provide the foundation for evaluating ByteCover and TPPNet. The first, "BYTECOVER: Cover Song Identification via Multi-Loss Training" by Du et al. (2021), introduces ByteCover, a sophisticated model leveraging a ResNet architecture enhanced with Instance-Batch Normalization (IBN) blocks. This design enables the model to extract features resilient to variations in key, tempo, and timbre. ByteCover processes Constant-Q Transform (CQT) spectrograms and utilizes a multi-loss training approach.
+The second paper, "Temporal Pyramid Pooling Convolutional Neural Network for Cover Song Identification" by Xu et al. (2019), presents TPPNet, a convolutional neural network employing Temporal Pyramid Pooling (TPP) to capture multi-scale temporal dependencies within CQT spectrograms. TPPNet excels at addressing issues like variable song durations and temporal misalignments.
+
+\section{Methodology}
+
+\subsection{CQTNet Baseline}
+We adopt CQTNet as the baseline model. The system takes Constant-Q Transform (CQT) representations of audio as input and learns an embedding that can be used for cover-song retrieval. The choice of CQT is motivated by its suitability for music analysis, since it organizes spectral energy in a way that better reflects pitch structure than raw waveform input. This makes it especially useful for modeling melodic similarity across versions of the same song.
+
+At inference time, each song is mapped to an embedding and retrieval is performed by comparing the query embedding against the embeddings of all candidate songs. In this way, the baseline model provides a direct measure of how well a strong Western pre-trained representation transfers to Indian popular music without additional domain-specific adaptation.
+
+\subsection{Fine-Tuning with CoversIndian}
+The baseline model is pre-trained on SHS100K and then adapted to the Indian setting through fine-tuning on CoversIndian. The motivation is that originals and covers retain culturally invariant similarity cues, even though Indian popular music also introduces vocal and stylistic properties that differ from the Western source domain. Fine-tuning therefore allows the model to preserve general cover-song knowledge while adjusting to the acoustic and musical characteristics of Indian songs.
+
+All subsequent experiments start from this adapted representation unless otherwise noted. In conceptual terms, this stage answers whether a Western cover-song model can be made more effective for Indian music through target-domain supervision.
+
+\subsection{Vocal Separation}
+Indian popular music often preserves the main vocal melody more strongly than accompaniment details across cover versions. Based on this observation, we evaluate a vocal-separated setting in which the vocal component of each song is isolated before computing the CQT representation. The same retrieval pipeline is then applied to these vocal-only inputs.
+
+This experiment tests whether suppressing accompaniment helps the model focus on the melodic content that is most stable across Indian covers. It also provides a useful contrast with the Western reference setting, where the same preprocessing may or may not be equally beneficial.
+
+\subsection{Data Augmentation}
+Because CoversIndian is relatively small, data augmentation is used to increase the diversity of cover examples seen during training. The augmentation strategy follows the ISMIR formulation by generating pitch-shifted and tempo-stretched variants of the cover recordings. In particular, the cover audio is modified by shifting pitch upward and downward, and by stretching tempo in both faster and slower directions.
+
+The purpose of this step is not merely to enlarge the dataset, but to make the retrieval model more robust to variations that commonly arise between an original song and its covers. This is especially relevant when only limited target-domain data is available.
+
+\subsection{Triplet Loss}
+Cross-entropy-based learning encourages class separation, but cover-song identification is fundamentally a ranking task. To shape the embedding space more directly for retrieval, we fine-tune the model with triplet loss. Each training instance is constructed from an anchor song, a positive cover of the same song, and a negative example from a different clique.
+
+\begin{equation}
+L_{\text{triplet}} = \max \left(0, \alpha + d(A,P) - d(A,N) \right)
+\end{equation}
+
+Here, $A$ denotes the anchor, $P$ the positive cover, $N$ a non-cover song, and $d(\cdot,\cdot)$ the embedding distance. This objective pulls genuine covers closer while pushing unrelated songs farther away, thereby improving the geometry of the retrieval space.
+
+\subsection{Modified Triplet Loss}
+In Indian music, some negative examples can be melodically close to the anchor even when they are not true covers. A standard random negative is therefore not always sufficiently informative. To address this, we use a modified triplet formulation that combines a random negative with a highly similar negative example.
+
+\begin{equation}
+L_{\text{mod}} = \max \left(0, \alpha + 2d(A,P) - \left[d(A,N_{\text{sim}}) + d(A,N_{\text{rand}})\right] \right)
+\end{equation}
+
+This design increases the pressure on the model to separate true covers from musically confusable non-covers. It is particularly suitable for Indian cover-song identification, where stylistic overlap and melodic similarity among unrelated songs can make the retrieval problem more challenging.
+
+\section{Experiments}
+The experimental design follows a progressive sequence of interventions. We first evaluate the baseline model on full-audio CQT representations. We then test the effect of vocal isolation, followed by metric-learning adaptation through triplet loss and modified triplet loss. The goal is to determine which changes improve retrieval on Indian Covers and how those same changes behave on a Western reference benchmark.
+
+\subsection{Datasets}
+The experiments focus on two datasets.
+
+\begin{table}[htbp]
+    \caption{Datasets used in the experiments}
+    \centering
+    \begin{adjustbox}{width=\columnwidth}
+    \begin{tabular}{p{2.5cm}p{4.1cm}p{2.1cm}}
+    \toprule
+    \textbf{Dataset} & \textbf{Role in the study} & \textbf{Split} \\
+    \midrule
+    CoversIndian & Target-domain dataset used for fine-tuning and evaluation on Indian cover songs. & 126 train / 119 test song pairs \\
+    SHS100K / SHS100K-Test & Western reference dataset used for pre-training, with SHS100K-Test used for held-out evaluation. & train split for pre-training / test split for evaluation \\
+    \bottomrule
+    \end{tabular}
+    \end{adjustbox}
+\end{table}
+
+In addition to the standard full-audio setting, vocally separated versions of both datasets are also evaluated in order to test the role of vocal melody in cover-song retrieval.
+
+\subsection{Experimental Progression}
+The experiments reported here focus on three main model conditions.
+
+\begin{enumerate}
+    \item \textbf{Baseline CQTNet:} the Western pre-trained retrieval model evaluated directly.
+    \item \textbf{Triplet-loss fine-tuned CQTNet:} the baseline further adapted so that the embedding space better reflects cover-song similarity.
+    \item \textbf{Modified-triplet fine-tuned CQTNet:} the triplet formulation strengthened with both random and highly similar negatives.
+\end{enumerate}
+
+These three conditions are evaluated on both normal audio and vocally separated audio for CoversIndian and SHS100K-Test.
+
+\subsection{Evaluation Metrics}
+We report three retrieval metrics throughout the study: Mean Average Precision (MAP), Top10 precision, and Rank1. MAP summarizes the overall quality of the ranking, Top10 measures how often correct covers appear in the top retrieved results, and Rank1 records how early the first correct cover is found. Together, these metrics provide a balanced view of full-list ranking quality and near-top retrieval performance.
+
+\section{Results}
+
+\begin{table}[htbp]
+    \caption{Retrieval results on full-audio CQT representations}
+    \centering
+    \begin{adjustbox}{width=\columnwidth}
+    \begin{tabular}{llccc}
+    \toprule
+    \textbf{Dataset} & \textbf{Model} & \textbf{MAP} & \textbf{Top10} & \textbf{Rank1} \\
+    \midrule
+    Indian Covers & Baseline CQTNet & 0.7366 & 0.3811 & 6.42 \\
+    Indian Covers & Triplet fine-tuned & 0.7460 & 0.3825 & \textbf{4.40} \\
+    Indian Covers & Modified triplet & \textbf{0.7620} & \textbf{0.5566} & 4.53 \\
+    \midrule
+    SHS100K-Test & Baseline CQTNet & 0.8844 & 0.9074 & 1.56 \\
+    SHS100K-Test & Triplet fine-tuned & \textbf{0.8871} & \textbf{0.9090} & 1.41 \\
+    SHS100K-Test & Modified triplet & 0.8839 & 0.9059 & \textbf{1.38} \\
+    \bottomrule
+    \end{tabular}
+    \end{adjustbox}
+\end{table}
+
+\begin{table}[htbp]
+    \caption{Retrieval results on vocally separated audio}
+    \centering
+    \begin{adjustbox}{width=\columnwidth}
+    \begin{tabular}{llccc}
+    \toprule
+    \textbf{Dataset} & \textbf{Model} & \textbf{MAP} & \textbf{Top10} & \textbf{Rank1} \\
+    \midrule
+    Indian Covers & Baseline CQTNet & 0.6811 & 0.3457 & 10.72 \\
+    Indian Covers & Triplet fine-tuned & 0.7279 & 0.3628 & 9.68 \\
+    Indian Covers & Modified triplet & \textbf{0.8043} & \textbf{0.5836} & \textbf{3.37} \\
+    \midrule
+    SHS100K-Test & Baseline CQTNet & 0.5996 & 0.7326 & 4.42 \\
+    SHS100K-Test & Triplet fine-tuned & 0.5950 & 0.7255 & 4.20 \\
+    SHS100K-Test & Modified triplet & \textbf{0.6717} & \textbf{0.7509} & \textbf{4.14} \\
+    \bottomrule
+    \end{tabular}
+    \end{adjustbox}
+\end{table}
+
+The results on full-audio CQTs show that domain adaptation is beneficial for Indian cover-song retrieval. On Indian Covers, triplet-loss fine-tuning improves over the baseline, and the modified triplet objective produces the strongest gains in MAP and Top10. This indicates that harder negative discrimination is useful when modeling similarity in Indian popular music. On SHS100K-Test, the baseline is already strong, and the improvements from additional fine-tuning are smaller, suggesting that the Western pre-trained representation is already well aligned with that domain.
+
+The vocal-separated experiments reveal the clearest domain-specific effect. On Indian Covers, the modified triplet model yields a substantial improvement over both the baseline and the triplet-loss model, raising MAP from 0.6811 to 0.8043 and reducing Rank1 from 10.72 to 3.37. This strongly supports the hypothesis that vocal melody is a dominant cue for cover-song identity in Indian popular music. On SHS100K-Test, full-audio retrieval remains stronger in absolute terms, but the modified triplet model still improves the vocal-only condition over the baseline and triplet-loss variants, reaching a MAP of 0.6717 and Top10 of 0.7509.
+
+Taken together, these findings are consistent with the broader conclusions of the ISMIR-style study. Fine-tuning a Western pre-trained CQTNet on Indian data improves target-domain retrieval, vocal-aware preprocessing is particularly valuable for Indian cover songs, and modified triplet loss provides the most effective metric-learning refinement among the tested variants.
+
+\section{Conclusion and Next Steps}
+This interim report shows that CQTNet can be adapted effectively to Indian cover-song identification. Fine-tuning improves retrieval over the Western pre-trained baseline, and the strongest Indian results are obtained when modified triplet loss is combined with vocally separated audio. The contrast between Indian Covers and SHS100K-Test further suggests that culturally informed preprocessing and embedding objectives are important when adapting cover-song identification models to Indian popular music.
+
+The next steps involve:
+\begin{enumerate}
+    \item Investigating larger-scale augmentation and harder-negative mining strategies for low-resource Indian cover-song data.
+    \item Exploring additional vocal-centric and self-supervised audio representations to further improve retrieval performance.
+\end{enumerate}
+
+\begin{thebibliography}{3}
+\bibitem{du2021bytecover}
+Du, X., et al., ``ByteCover: Cover Song Identification via Multi-Loss Training,'' \textit{Proc. IEEE Int. Conf. Acoust., Speech, Signal Process. (ICASSP)}, 2021.
+
+\bibitem{xu2019tppnet}
+Yu, Z., et al., ``Temporal Pyramid Pooling Convolutional Neural Network for Cover Song Identification,'' \textit{Proc. Int. Joint Conf. Artif. Intell. (IJCAI)}, 2019.
+
+\bibitem{yt_dlp_repo}
+The yt-dlp developers, ``yt-dlp: A youtube-dl fork with additional features and fixes,'' \textit{[Online]. Available: \url{https://github.com/yt-dlp/yt-dlp}}.
+\end{thebibliography}
+
+\end{document}

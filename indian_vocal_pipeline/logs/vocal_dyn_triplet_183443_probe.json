@@ -1,0 +1,105 @@
+{
+  "run_name": "vocal_dyn_triplet_183443_probe",
+  "dataset": "indian_vocal",
+  "checkpoint_init": "check_points/CQTNet_indian_vocal_triplet_best_indian_vocal_triplet_20260430_183443.pth",
+  "batch_size": 120,
+  "ce_history": [],
+  "ce_best_val_map": null,
+  "ce_best_epoch": null,
+  "ce_checkpoint": null,
+  "ce_test_map": 0.7279400665370491,
+  "ce_test_top10": 0.3627644569816643,
+  "ce_test_rank1": 9.68265162200282,
+  "triplet_history": [],
+  "triplet_best_val_map": null,
+  "triplet_best_epoch": null,
+  "triplet_checkpoint": null,
+  "triplet_test_map": null,
+  "triplet_test_top10": null,
+  "triplet_test_rank1": null,
+  "mod_triplet_history": [],
+  "mod_triplet_best_val_map": null,
+  "mod_triplet_best_epoch": null,
+  "mod_triplet_checkpoint": null,
+  "mod_triplet_test_map": null,
+  "mod_triplet_test_top10": null,
+  "mod_triplet_test_rank1": null,
+  "dyn_triplet_history": [
+    {
+      "epoch": 1,
+      "dyn_triplet_loss": 0.2503684938297068,
+      "val_map": 0.5017063931172117,
+      "val_top10": 0.37810167081407753,
+      "val_rank1": 23.139353003910415
+    },
+    {
+      "epoch": 2,
+      "dyn_triplet_loss": 0.25392843797606857,
+      "val_map": 0.5021900175150322,
+      "val_top10": 0.3784216139353004,
+      "val_rank1": 23.08460718094561
+    },
+    {
+      "epoch": 3,
+      "dyn_triplet_loss": 0.1816961957594833,
+      "val_map": 0.5026206623198876,
+      "val_top10": 0.3784216139353004,
+      "val_rank1": 23.57767507998578
+    },
+    {
+      "epoch": 4,
+      "dyn_triplet_loss": 0.24977980609983205,
+      "val_map": 0.5013103288673972,
+      "val_top10": 0.3777817276928546,
+      "val_rank1": 24.05261286882332
+    },
+    {
+      "epoch": 5,
+      "dyn_triplet_loss": 0.17572447005659342,
+      "val_map": 0.5015645707335217,
+      "val_top10": 0.3772484891574831,
+      "val_rank1": 23.90046214006399
+    },
+    {
+      "epoch": 6,
+      "dyn_triplet_loss": 0.2277741233507792,
+      "val_map": 0.5020452824892894,
+      "val_top10": 0.37781727692854605,
+      "val_rank1": 23.739068610024884
+    },
+    {
+      "epoch": 7,
+      "dyn_triplet_loss": 0.21725939515071283,
+      "val_map": 0.5021626424966552,
+      "val_top10": 0.3776395307500889,
+      "val_rank1": 23.908638464273018
+    },
+    {
+      "epoch": 8,
+      "dyn_triplet_loss": 0.24680258991087184,
+      "val_map": 0.5021158244708782,
+      "val_top10": 0.3771418414504088,
+      "val_rank1": 23.797369356558836
+    },
+    {
+      "epoch": 9,
+      "dyn_triplet_loss": 0.21368343187005898,
+      "val_map": 0.5023272959044308,
+      "val_top10": 0.37739068610024884,
+      "val_rank1": 23.863135442587986
+    },
+    {
+      "epoch": 10,
+      "dyn_triplet_loss": 0.2173014596486703,
+      "val_map": 0.5026941511928446,
+      "val_top10": 0.37710629221471736,
+      "val_rank1": 23.805545680767864
+    }
+  ],
+  "dyn_triplet_best_val_map": 0.5026941511928446,
+  "dyn_triplet_best_epoch": 10,
+  "dyn_triplet_checkpoint": "/teamspace/studios/this_studio/PP4/check_points/CQTNet_indian_vocal_dyn_triplet_best_vocal_dyn_triplet_183443_probe.pth",
+  "dyn_triplet_test_map": 0.7191674763927416,
+  "dyn_triplet_test_top10": 0.3610719322990127,
+  "dyn_triplet_test_rank1": 9.606488011283497
+}

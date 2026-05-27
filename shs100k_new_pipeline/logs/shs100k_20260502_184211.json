@@ -1,0 +1,147 @@
+{
+  "run_name": "shs100k_20260502_184211",
+  "dataset": "shs100k",
+  "checkpoint_init": "/teamspace/studios/this_studio/PP4/check_points/CQTNet_SHS100k_finetune_epoch_74.pth",
+  "batch_size": 120,
+  "ce_history": [],
+  "ce_best_val_map": null,
+  "ce_best_epoch": null,
+  "ce_checkpoint": null,
+  "ce_test_map": 0.8870580951950976,
+  "ce_test_top10": 0.9089678510998308,
+  "ce_test_rank1": 1.4060913705583757,
+  "triplet_history": [],
+  "triplet_best_val_map": null,
+  "triplet_best_epoch": null,
+  "triplet_checkpoint": null,
+  "triplet_test_map": null,
+  "triplet_test_top10": null,
+  "triplet_test_rank1": null,
+  "mod_triplet_history": [
+    {
+      "epoch": 1,
+      "mod_triplet_loss": 0.0,
+      "val_map": 0.8961213057854684,
+      "val_top10": 0.8956736035049288,
+      "val_rank1": 1.7141292442497262
+    },
+    {
+      "epoch": 2,
+      "mod_triplet_loss": 0.0,
+      "val_map": 0.895744948711826,
+      "val_top10": 0.895618838992333,
+      "val_rank1": 1.7261774370208105
+    },
+    {
+      "epoch": 3,
+      "mod_triplet_loss": 0.00630139522254467,
+      "val_map": 0.8961049042262597,
+      "val_top10": 0.8962212486308871,
+      "val_rank1": 1.709748083242059
+    },
+    {
+      "epoch": 4,
+      "mod_triplet_loss": 0.0015152238664172945,
+      "val_map": 0.8959700041534461,
+      "val_top10": 0.8965498357064622,
+      "val_rank1": 1.706462212486309
+    },
+    {
+      "epoch": 5,
+      "mod_triplet_loss": 0.00015226243773386593,
+      "val_map": 0.8969115427165352,
+      "val_top10": 0.8962212486308871,
+      "val_rank1": 1.7371303395399782
+    },
+    {
+      "epoch": 6,
+      "mod_triplet_loss": 0.006550343263716925,
+      "val_map": 0.8969196998203856,
+      "val_top10": 0.8961664841182915,
+      "val_rank1": 1.7332968236582695
+    },
+    {
+      "epoch": 7,
+      "mod_triplet_loss": 0.0,
+      "val_map": 0.89705064368147,
+      "val_top10": 0.8964950711938664,
+      "val_rank1": 1.732749178532311
+    },
+    {
+      "epoch": 8,
+      "mod_triplet_loss": 0.001979848917792825,
+      "val_map": 0.8975973380240688,
+      "val_top10": 0.8969331872946331,
+      "val_rank1": 1.721248630887185
+    },
+    {
+      "epoch": 9,
+      "mod_triplet_loss": 0.0,
+      "val_map": 0.8976941351194039,
+      "val_top10": 0.8970427163198247,
+      "val_rank1": 1.71960569550931
+    },
+    {
+      "epoch": 10,
+      "mod_triplet_loss": 0.025174205953424626,
+      "val_map": 0.8977731131403215,
+      "val_top10": 0.8965498357064622,
+      "val_rank1": 1.52026286966046
+    },
+    {
+      "epoch": 11,
+      "mod_triplet_loss": 0.0013196438550949097,
+      "val_map": 0.8979246884961704,
+      "val_top10": 0.8957283680175246,
+      "val_rank1": 1.5076670317634173
+    },
+    {
+      "epoch": 12,
+      "mod_triplet_loss": 0.00677833232012662,
+      "val_map": 0.898293629649699,
+      "val_top10": 0.8964403066812705,
+      "val_rank1": 1.4742606790799562
+    },
+    {
+      "epoch": 13,
+      "mod_triplet_loss": 0.0014365084158877532,
+      "val_map": 0.8988016110539,
+      "val_top10": 0.8968784227820372,
+      "val_rank1": 1.462212486308872
+    },
+    {
+      "epoch": 14,
+      "mod_triplet_loss": 0.0,
+      "val_map": 0.8993054785080731,
+      "val_top10": 0.8973165388828039,
+      "val_rank1": 1.4972617743702081
+    },
+    {
+      "epoch": 15,
+      "mod_triplet_loss": 0.0010185139697222482,
+      "val_map": 0.8995620150020064,
+      "val_top10": 0.8981380065717415,
+      "val_rank1": 1.4786418400876231
+    },
+    {
+      "epoch": 16,
+      "mod_triplet_loss": 0.0,
+      "val_map": 0.899515149026341,
+      "val_top10": 0.8980832420591456,
+      "val_rank1": 1.475355969331873
+    }
+  ],
+  "mod_triplet_best_val_map": 0.8995620150020064,
+  "mod_triplet_best_epoch": 15,
+  "mod_triplet_checkpoint": "/teamspace/studios/this_studio/PP4/check_points/CQTNet_shs100k_mod_triplet_best_shs100k_20260502_184211.pth",
+  "mod_triplet_test_map": 0.8839119174618155,
+  "mod_triplet_test_top10": 0.9059221658206431,
+  "mod_triplet_test_rank1": 1.38917089678511,
+  "dyn_triplet_history": [],
+  "dyn_triplet_best_val_map": null,
+  "dyn_triplet_best_epoch": null,
+  "dyn_triplet_checkpoint": null,
+  "dyn_triplet_test_map": null,
+  "dyn_triplet_test_top10": null,
+  "dyn_triplet_test_rank1": null
+}

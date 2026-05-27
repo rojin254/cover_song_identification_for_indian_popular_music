@@ -111,6 +111,7 @@ def transfer_learning(**kwargs):
 
     # Load best model and evaluate on test set
     model.load_state_dict(torch.load(best_model_path))
+    torch.cuda.empty_cache()
     test_map, test_top10, test_rank1 = val_slow(model, test_loader, -1, "Indian Test Set")
     print(f"Final Test Set Performance - MAP: {test_map:.4f}, Top10: {test_top10:.4f}, Rank1: {test_rank1:.2f}")
     
@@ -175,6 +176,7 @@ def fine_tune_model(model, optimizer, train_loader, val_loader, test_loader, opt
     
     # Load best model and evaluate on test set
     model.load_state_dict(torch.load(best_model_path))
+    torch.cuda.empty_cache()
     test_map, test_top10, test_rank1 = val_slow(model, test_loader, -1, "Indian Test Set")
     print(f"Final Test Set Performance - MAP: {test_map:.4f}, Top10: {test_top10:.4f}, Rank1: {test_rank1:.2f}")
 

@@ -114,7 +114,7 @@ def create_modified_triplets(embeddings, labels, is_orig, nsim_emb_dict, device)
             neg_rands.append(embeddings[neg_r_idx].unsqueeze(0))
 
             if label_val in nsim_emb_dict:
-                neg_sims.append(nsim_emb_dict[label_val].unsqueeze(0))
+                neg_sims.append(nsim_emb_dict[label_val].to(embeddings.device).unsqueeze(0))
             else:
                 neg_sims.append(embeddings[neg_r_idx].unsqueeze(0))
 
@@ -193,7 +193,7 @@ def compute_nsim_embeddings(model, nsim_map, clique_to_original, cqt_dir, label_
             data = data.unsqueeze(0).to(device)
             _, emb = model(data)
             if clique in label_map:
-                nsim_emb_dict[label_map[clique]] = emb.squeeze(0)
+                nsim_emb_dict[label_map[clique]] = emb.squeeze(0).detach().cpu()
     return nsim_emb_dict
 
 
@@ -224,7 +224,7 @@ def val_slow(model, dataloader, device, dataset_name):
 
 def transfer_learning(**kwargs):
     opt.batch_size = 120
-    opt.num_workers = 2
+    opt.num_workers = 4
     opt.model = 'CQTNet'
     opt.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     opt._parse(kwargs)
@@ -307,7 +307,7 @@ def transfer_learning(**kwargs):
     best_val_map = -1.0
     best_ce_path = os.path.join(checkpoint_dir, f'CQTNet_shs100k_vocal_ce_best_{run_name}.pth')
     early_stop = 0
-    early_stop_patience = 15
+    early_stop_patience = 25
     min_delta = 0.002
 
     if skip_transfer:
@@ -376,26 +376,39 @@ def transfer_learning(**kwargs):
     with open(run_log_path, 'w') as fp:
         json.dump(run_summary, fp, indent=2)
 
-    if kwargs.get('modified_triplet', False):
-        print('\n=== Stage 2: Modified Triplet Loss Fine-tuning ===')
-        fine_tune_model_modified_triplet(
-            model, optimizer, train_loader, val_loader, test_loader,
-            run_name, checkpoint_dir, logs_dir, run_summary, run_log_path,
-        )
-    elif kwargs.get('fine_tune', False):
-        print('\n=== Stage 2: Triplet Loss Fine-tuning ===')
-        fine_tune_model(
-            model, optimizer, train_loader, val_loader, test_loader,
-            run_name, checkpoint_dir, logs_dir, run_summary, run_log_path,
-        )
+    num_fine_tune_epochs = kwargs.get('num_fine_tune_epochs', None)
+
+    # --- Stage 2: Triplet Loss (from CE model) ---
+    print('\n=== Stage 2: Triplet Loss Fine-tuning ===')
+    # Explicitly delete CE optimizer so its GPU state is freed before triplet
+    del optimizer
+    torch.cuda.empty_cache()
+    # Reload best CE weights so triplet starts from CE model, not a partially-trained state
+    model.load_state_dict(torch.load(best_ce_path, map_location=opt.device))
+    fine_tune_model(
+        model, train_loader, val_loader, test_loader,
+        run_name, checkpoint_dir, logs_dir, run_summary, run_log_path,
+    )
+
+    # --- Stage 3: Dynamic Modified Triplet Loss (from CE model) ---
+    print('\n=== Stage 3: Dynamic Modified Triplet Loss Fine-tuning ===')
+    torch.cuda.empty_cache()
+    # Reload best CE weights again so dynamic triplet also starts from CE model
+    model.load_state_dict(torch.load(best_ce_path, map_location=opt.device))
+    fine_tune_model_dynamic_triplet(
+        model, train_loader, val_loader, test_loader,
+        run_name, checkpoint_dir, logs_dir, run_summary, run_log_path,
+        num_epochs=num_fine_tune_epochs,
+        nsim_refresh_interval=kwargs.get('nsim_refresh_interval', None),
+    )
 
 
 def fine_tune_model(
-    model, optimizer, train_loader, val_loader, test_loader,
+    model, train_loader, val_loader, test_loader,
     run_name, checkpoint_dir, logs_dir, run_summary, run_log_path,
 ):
     num_epochs = 75
-    patience = 15
+    patience = 25
     min_delta = 0.002
     best_val_map = -1.0
     early_stop = 0
@@ -409,12 +422,21 @@ def fine_tune_model(
     criterion = nn.TripletMarginLoss(margin=0.05)
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-4)
 
+    # Smaller batch size — triplet holds 3 sets of embeddings simultaneously
+    triplet_loader = DataLoader(
+        train_loader.dataset,
+        batch_size=64,
+        shuffle=True,
+        num_workers=train_loader.num_workers,
+        collate_fn=custom_collate,
+    )
+
     for epoch in range(num_epochs):
         model.train()
         total_loss = 0.0
         update_steps = 0
 
-        for inputs, labels, is_orig in tqdm(train_loader, desc=f'Triplet Epoch {epoch + 1}/{num_epochs}'):
+        for inputs, labels, is_orig in tqdm(triplet_loader, desc=f'Triplet Epoch {epoch + 1}/{num_epochs}'):
             inputs = inputs.to(opt.device)
             labels = labels.to(opt.device)
             is_orig = is_orig.to(opt.device)
@@ -484,6 +506,7 @@ def fine_tune_model(
 def fine_tune_model_modified_triplet(
     model, optimizer, train_loader, val_loader, test_loader,
     run_name, checkpoint_dir, logs_dir, run_summary, run_log_path,
+    num_epochs=None,
 ):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     lookup_path = os.path.join(base_dir, 'nsim_lookup.json')
@@ -503,8 +526,8 @@ def fine_tune_model_modified_triplet(
 
     label_map = train_loader.dataset.label_map
 
-    num_epochs = 75
-    patience = 15
+    num_epochs = num_epochs if num_epochs is not None else 75
+    patience = 25
     min_delta = 0.002
     best_val_map = -1.0
     early_stop = 0
@@ -515,6 +538,15 @@ def fine_tune_model_modified_triplet(
         checkpoint_dir, f'CQTNet_shs100k_vocal_mod_triplet_best_{run_name}.pth'
     )
     run_summary['mod_triplet_checkpoint'] = best_path
+
+    # Use smaller batch size to avoid OOM (nsim embeddings use extra GPU memory)
+    mod_train_loader = DataLoader(
+        train_loader.dataset,
+        batch_size=120,
+        shuffle=True,
+        num_workers=train_loader.num_workers,
+        collate_fn=custom_collate,
+    )
 
     for name, param in model.named_parameters():
         param.requires_grad = 'conv0' not in name
@@ -540,7 +572,7 @@ def fine_tune_model_modified_triplet(
         update_steps = 0
 
         for inputs, labels, is_orig in tqdm(
-            train_loader, desc=f'ModTrip Epoch {epoch + 1}/{num_epochs}'
+            mod_train_loader, desc=f'ModTrip Epoch {epoch + 1}/{num_epochs}'
         ):
             inputs = inputs.to(opt.device)
             labels = labels.to(opt.device)
@@ -611,6 +643,231 @@ def fine_tune_model_modified_triplet(
         json.dump(run_summary, fp, indent=2)
 
     print(f'Run summary saved: {run_log_path}')
+
+
+@torch.no_grad()
+def recompute_nsim_from_model(model, train_loader, device):
+    """
+    Dynamically compute N_sim using current model embeddings.
+    For each clique's original, find the most similar song from a different clique
+    in the learned embedding space.
+
+    All heavy matrix operations are done on CPU to avoid GPU OOM.
+
+    Returns:
+        nsim_emb_dict: dict {label_int: embedding_tensor (D,)} stored on CPU
+    """
+    model.eval()
+    all_embeddings = []
+    all_labels = []
+    all_is_orig = []
+
+    for data, labels, is_orig in tqdm(train_loader, desc='Computing embeddings for N_sim'):
+        data = data.to(device)
+        _, embedding = model(data)
+        all_embeddings.append(embedding.detach().cpu())
+        all_labels.append(labels.cpu())
+        all_is_orig.append(is_orig.cpu())
+
+    # All subsequent ops on CPU to avoid GPU OOM
+    embeddings = torch.cat(all_embeddings)       # (N, D) on CPU
+    labels = torch.cat(all_labels)               # (N,) on CPU
+    is_orig = torch.cat(all_is_orig)             # (N,) on CPU
+
+    # L2-normalize for cosine similarity (CPU)
+    emb_norm = F.normalize(embeddings, p=2, dim=1)
+    sim_matrix = emb_norm @ emb_norm.T           # (N, N) on CPU
+
+    nsim_emb_dict = {}
+
+    # For each original, find the hardest negative (most similar from different clique)
+    orig_indices = torch.where(is_orig)[0]
+    for idx in orig_indices:
+        label_val = labels[idx].item()
+        sims = sim_matrix[idx].clone()
+
+        # Mask out same-clique songs
+        same_clique_mask = labels == labels[idx]
+        sims[same_clique_mask] = -2.0  # below min cosine similarity
+
+        best_neg_idx = sims.argmax().item()
+        # Keep on CPU; create_modified_triplets will move to device as needed
+        nsim_emb_dict[label_val] = embeddings[best_neg_idx]
+
+    return nsim_emb_dict
+
+
+def fine_tune_model_dynamic_triplet(
+    model, train_loader, val_loader, test_loader,
+    run_name, checkpoint_dir, logs_dir, run_summary, run_log_path,
+    num_epochs=None,
+    nsim_refresh_interval=None,
+):
+    """
+    Modified triplet loss with dynamically recomputed N_sim from model embeddings.
+    No dependency on nsim_lookup.json or compute_nsim_lookup.py.
+    """
+    num_epochs = num_epochs if num_epochs is not None else 75
+    patience = 25
+    min_delta = 0.002
+    best_val_map = -1.0
+    early_stop = 0
+    nsim_refresh_interval = nsim_refresh_interval if nsim_refresh_interval is not None else 3
+    margin = 0.3
+
+    best_path = os.path.join(
+        checkpoint_dir, f'CQTNet_shs100k_vocal_dyn_triplet_best_{run_name}.pth'
+    )
+    run_summary['dyn_triplet_history'] = []
+    run_summary['dyn_triplet_best_val_map'] = None
+    run_summary['dyn_triplet_best_epoch'] = None
+    run_summary['dyn_triplet_checkpoint'] = best_path
+    run_summary['dyn_triplet_test_map'] = None
+    run_summary['dyn_triplet_test_top10'] = None
+    run_summary['dyn_triplet_test_rank1'] = None
+
+    for name, param in model.named_parameters():
+        param.requires_grad = 'conv0' not in name
+
+    optimizer = torch.optim.Adam(
+        filter(lambda p: p.requires_grad, model.parameters()), lr=5e-5
+    )
+
+    # Reduced batch size to avoid GPU OOM during triplet construction
+    dyn_train_loader = DataLoader(
+        train_loader.dataset,
+        batch_size=64,
+        shuffle=True,
+        num_workers=train_loader.num_workers,
+        collate_fn=custom_collate,
+    )
+
+    # Initial N_sim computation from model embeddings (CPU ops to avoid OOM)
+    torch.cuda.empty_cache()
+    nsim_emb_dict = recompute_nsim_from_model(model, dyn_train_loader, opt.device)
+    print(f'Computed dynamic N_sim embeddings for {len(nsim_emb_dict)} cliques')
+
+    for epoch in range(num_epochs):
+        # Refresh N_sim embeddings periodically
+        if epoch > 0 and epoch % nsim_refresh_interval == 0:
+            torch.cuda.empty_cache()
+            nsim_emb_dict = recompute_nsim_from_model(model, dyn_train_loader, opt.device)
+            print(f'Refreshed dynamic N_sim embeddings (epoch {epoch + 1})')
+
+        model.train()
+        total_loss = 0.0
+        update_steps = 0
+
+        for inputs, labels, is_orig in tqdm(
+            dyn_train_loader, desc=f'DynTrip Epoch {epoch + 1}/{num_epochs}'
+        ):
+            inputs = inputs.to(opt.device)
+            labels = labels.to(opt.device)
+            is_orig = is_orig.to(opt.device)
+
+            _, embeddings = model(inputs)
+            anchor, positive, neg_rand, neg_sim = create_modified_triplets(
+                embeddings, labels, is_orig, nsim_emb_dict, opt.device
+            )
+            if anchor.numel() == 0:
+                continue
+
+            loss = modified_triplet_loss(anchor, positive, neg_rand, neg_sim, margin)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            total_loss += loss.item()
+            update_steps += 1
+
+        avg_loss = total_loss / update_steps if update_steps > 0 else 0.0
+        print(f'DynTrip Epoch {epoch + 1}/{num_epochs}, Loss: {avg_loss:.4f}')
+
+        val_map, val_top10, val_rank1 = val_slow(
+            model, val_loader, opt.device, 'SHS100k Vocal Validation'
+        )
+        print(f'Validation - MAP: {val_map:.4f}, Top10: {val_top10:.4f}, Rank1: {val_rank1:.2f}')
+
+        run_summary['dyn_triplet_history'].append({
+            'epoch': epoch + 1,
+            'dyn_triplet_loss': float(avg_loss),
+            'val_map': float(val_map),
+            'val_top10': float(val_top10),
+            'val_rank1': float(val_rank1),
+        })
+
+        if val_map > best_val_map + min_delta:
+            best_val_map = val_map
+            torch.save(model.state_dict(), best_path)
+            run_summary['dyn_triplet_best_val_map'] = float(best_val_map)
+            run_summary['dyn_triplet_best_epoch'] = epoch + 1
+            print(f'New best dynamic-triplet model saved: {best_path}')
+            early_stop = 0
+        else:
+            early_stop += 1
+            if val_map > best_val_map:
+                best_val_map = val_map
+                torch.save(model.state_dict(), best_path)
+                run_summary['dyn_triplet_best_val_map'] = float(best_val_map)
+                run_summary['dyn_triplet_best_epoch'] = epoch + 1
+            print(f'No significant improvement for {early_stop}/{patience} epochs')
+            if early_stop >= patience:
+                print('Early stopping triggered (dynamic-triplet stage).')
+                break
+
+    if os.path.exists(best_path):
+        model.load_state_dict(torch.load(best_path, map_location=opt.device))
+
+    test_map, test_top10, test_rank1 = val_slow(
+        model, test_loader, opt.device, 'SHS100k Vocal Test Set (after DynTriplet)'
+    )
+    print(f'DynTriplet test - MAP: {test_map:.4f}, Top10: {test_top10:.4f}, Rank1: {test_rank1:.2f}')
+
+    run_summary['dyn_triplet_test_map'] = float(test_map)
+    run_summary['dyn_triplet_test_top10'] = float(test_top10)
+    run_summary['dyn_triplet_test_rank1'] = float(test_rank1)
+
+    with open(run_log_path, 'w') as fp:
+        json.dump(run_summary, fp, indent=2)
+
+    print(f'Run summary saved: {run_log_path}')
+
+
+def evaluate(**kwargs):
+    """
+    Load a checkpoint and run val + test evaluation with no training.
+    Usage:
+        python shs100k_vocal_pipeline/main.py evaluate \
+            --checkpoint=/path/to/model.pth
+    """
+    opt.num_workers = 4
+    opt.model = 'CQTNet'
+    opt.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f'Using device: {opt.device}')
+
+    checkpoint = kwargs.get('checkpoint')
+    if not checkpoint or not os.path.exists(checkpoint):
+        raise FileNotFoundError(f'Checkpoint not found: {checkpoint}')
+
+    val_data = SHS100kVocalCQT('val')
+    test_data = SHS100kVocalCQT('test')
+
+    num_classes = SHS100kVocalCQT('train').label_count
+    model = getattr(models, opt.model)()
+    model.fc1 = nn.Linear(300, num_classes)
+    safe_load_model(model, checkpoint)
+    model = model.to(opt.device)
+    torch.cuda.empty_cache()
+
+    val_loader = DataLoader(val_data, batch_size=1, shuffle=False, num_workers=opt.num_workers, collate_fn=custom_collate)
+    test_loader = DataLoader(test_data, batch_size=1, shuffle=False, num_workers=opt.num_workers, collate_fn=custom_collate)
+
+    val_map, val_top10, val_rank1 = val_slow(model, val_loader, opt.device, 'SHS100k Vocal Validation')
+    test_map, test_top10, test_rank1 = val_slow(model, test_loader, opt.device, 'SHS100k Vocal Test Set')
+
+    print('\n=== Evaluation Summary ===')
+    print(f'Checkpoint : {checkpoint}')
+    print(f'Val   MAP={val_map:.4f}  Top10={val_top10:.4f}  Rank1={val_rank1:.2f}')
+    print(f'Test  MAP={test_map:.4f}  Top10={test_top10:.4f}  Rank1={test_rank1:.2f}')
 
 
 if __name__ == '__main__':

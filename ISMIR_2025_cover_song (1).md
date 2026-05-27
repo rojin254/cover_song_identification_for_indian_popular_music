@@ -2,6 +2,129 @@
 ### ISMIR 2025 Submission
 
 ---
+## Abstract
+Indian popular music, characterized by its unique scales
+and vocal styles, presents additional challenges for cover
+song identification. While there are culture-specific char-
+acteristics in tcovers of Indian popular songs, there are sim-
+ilar attributes that are culturally invariant. We leverage this
+insight by fine-tuning CQTNet, a state-of-the-art model
+pre-trained on a large dataset of Western cover songs. We
+notice an enhancement in results when fine-tuning is per-
+formed using the Indian popular songs dataset. To mitigate
+the problem of data scarcity, we conducted experiments
+involving data augmentation, creating modified cover ver-
+sions with altered tempo and tonic. In our training, we
+investigated the effectiveness of Triplet Loss and its en-
+hanced version, which takes supplementary positive and
+negative instances that exhibit varying degrees of similar-
+ity and dissimilarity.
+
+## Introduction
+Indian popular music, known for its lively melodies and
+rhythms, is hugely popular across India and many other
+countries in South Asia, with cover songs becoming a big
+part as artists rework old and new hits. Identifying these
+cover songs matters for improving music recommenda-
+tions and protecting copyrights. Indian popular songs are
+inspired by the raga-based melodies of Indian classical mu-
+sic and the stylistic elements of Western music, blending
+these influences into a distinct musical identity. In the the-
+ory and practice of Western music, harmony is a core con-
+cept [1]. Unlike Western songs, Indian popular music gives
+more importance to the main vocal melody. The vocal-
+ists generally employ melismatic singing and ornamenta-
+tions. Apart from these characteristics, most Indian popu-
+lar songs exhibit a distinct melodic and rhythmic structure.
+© F. Author, S. Author, and T. Author. Licensed under
+Creative Commons Attribution 4.0 International License (CC BY 4.0
+Attribution: F. Author, S. Author, and T. Author, “Adapting Cover So
+Identification Methods to the Unique Features of Indian Popular Music
+submitted to ISMIR, 202
+The unique features and salient components of Indian
+popular music play a significant role in the similarity be-
+tween original songs and their cover versions, as these el-
+ements tend to be retained in the covers. Given the im-
+portance of vocal melody in Indian popular music, cover
+versions typically retain the original melody with only mi-
+nor changes. The design of many cover song identifica-
+tion methods has been motivated by the assumptions be-
+hind what makes a cover [2]. The prevailing notions of
+what constitutes a cover version in Indian popular music
+underpin this research inquiry and motivate the need for a
+separate investigation.
+Earlier cover song identification approaches involved
+extracting features from audio signals and measuring the
+similarity between songs using these extracted features.
+Initial approaches relied on pitch detection and finding
+the optimal alignment between the query and the can-
+didate song [3]. Quite a good number of approaches
+investigated the effectiveness of chroma features, which
+represent the energy distribution across different musical
+notes [4–6]. Dynamic programming-based approaches like
+Dynamic Time Warping (DTW) [7] and Smith-Waterman
+alignment [8, 9] enabled the sequence similarity.
+Later, deep learning transformed cover song identifica-
+tion by automating feature extraction and improving ac-
+curacy, outperforming traditional methods. Some of these
+approaches aim to learn song representations that are sub-
+sequently used to calculate song similarities. Notable ap-
+proaches in this direction include the siamese network-
+based method [10] and the CNN-based CQTNet [11].
+Chang et al. [12] transformed cover song identification
+into an image classification task by applying convolutional
+neural networks to cross-similarity matrices derived from
+songs’ chroma features [13]. ByteCover investigates a fea-
+ture learning method with the ResNet model along with
+multi-loss training [14]. CoverHunter [15] uses a trans-
+former model with attention and a combined focal, center,
+and triplet loss function.
+There are no culture-specific approaches to cover song
+identification in any musical tradition. However, culture-
+specific investigations have been conducted in numerous
+other music information retrieval tasks. For instance, re-
+search has been conducted on pitch detection in Turkish
+music [16, 17], Indian popular and classical music [18, 19],
+Flamenco singing [20, 21], Arab music [22, 23]. The
+culture-specific attributes of music emotion detection have
+initiated investigations in Turkish music [24, 25], Indian
+popular music [26, 27], Greek music [28].
+Our research investigates cover song identification in
+Indian popular music, driven by two key questions:
+1. Is a specialized model, trained exclusively on Indian
+popular music, necessary for effective cover song
+identification?
+2. Do unique characteristics of Indian popular music
+necessitate custom-designed approaches for accu-
+rate cover song identification?
+Being one of the best and widely experimented cover
+song identification methods, we choose CQTNet [11] as
+our baseline. Considering our limited dataset of Indian
+popular songs and the fact that there are cultural invari-
+ant similarity attributes between the original and the cover
+version of a song, we experiment with fine-tuning CQTNet
+with cover song dataset for Indian popular songs (Cover-
+sIndian). The performance gains with the fine-tuned model
+over the original CQTNet model provide a clear answer
+to the first research question. Leveraging the knowledge
+that vocal melody plays a dominant role in Indian popu-
+lar songs, we investigate the effectiveness of isolating vo-
+cals from the audio signal. This pre-processing step yields
+improved results on the CoversIndian dataset, whereas it
+lowers the results on the Covers80 dataset [29]. This out-
+come answers our second research question, highlighting
+the importance of culturally informed approaches.
+To address the challenge of limited training data, we
+explore a data augmentation technique. Additionally, we
+examine the impact of triplet loss [30] and propose a mod-
+ification to the triplet loss tailored for CQTNet. While
+fine-tuning and vocal separation show significant improve-
+ments in results, certain combinations of the other pro-
+posed modifications also yield observable enhancements.
+To the best of our knowledge, this study is the first to
+specifically address cover song identification within the
+context of a particular music culture
+
 
 ## 1. Methodology
 
@@ -336,3 +459,26 @@ output     = final_fc(fused)
 | CQTNet + HuBERT     | 0.4466 | 0.0601 | 37    |
 
 > Fusing large audio model embeddings with CQT features yielded **no improvement**. MERT/HuBERT weights were kept frozen; trainable fusion or attention-based merging may be explored in future work.
+
+## Conclustion
+This study successfully adapts a state-of-the-art cover song388
+identification method CQTNet, to the unique features of389
+Indian popular music, addressing challenges posed by its390
+distinct melodic and vocal characteristics. By fine-tuning391
+CQTNet on the CoversIndian dataset, we demonstrate392
+significant performance improvements, particularly when393
+leveraging vocal separation techniques that emphasize the394
+prominence of vocal melodies in Indian music. Data aug-395
+mentation further mitigates the issue of limited training396
+data, enabling the model to learn from diverse variations397
+of cover songs.398
+The introduction of a modified triplet loss function399
+proves effective in capturing subtle differences between400
+similar negative cover instances and positive covers, en-401
+hancing the model’s ability to discriminate between chal-402
+lenging examples.
+Our findings highlight the importance of culturally in-406
+formed pre-processing steps and loss functions tailored to407
+specific musical traditions. This research lays the ground-408
+work for further investigations into adapting cover song409
+identification to diverse musical genres and traditions.
