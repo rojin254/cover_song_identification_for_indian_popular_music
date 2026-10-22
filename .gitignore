@@ -44,6 +44,11 @@ ENV/
 *.swp
 *.swo
 
+# Local environment variables
+.env
+.env.*
+!.env.example
+
 # Logs and runtime files
 *.log
 *.out
