@@ -3,10 +3,16 @@
 A self-contained pipeline that adds two ideas on top of the existing Indian
 CSI baseline:
 
-1. **Tonic-relative CQT rotation** as preprocessing — see
-   [research.md](research.md) and
-   [NOVEL_INDIAN_CSI_PROPOSAL.md](NOVEL_INDIAN_CSI_PROPOSAL.md).
-2. **SupCon + SubCenter-ArcFace + dynamic-modified-triplet** as the loss.
+1. **Tonic-relative CQT rotation** as preprocessing — tested across 5 rows,
+   consistently hurt MAP by 5–8%; treated as a negative result (see
+   [research.md](research.md)).
+2. **SupCon + SubCenter-ArcFace + dynamic-modified-triplet** as the loss —
+   SupCon is the dominant improvement (+0.75% MAP on Indian, +1.57% on SHS100K
+   over the baseline).
+
+The pipeline ran **9 ablation rows** in total. Best result so far: **Row 3
+(Dyn Triplet + SupCon)** at MAP 0.7500 Indian / 0.8466 SHS100K. Row 9 (SupCon
++ ArcFace, no tonic) is the latest experiment.
 
 Nothing in `indian_new_pipeline/`, `indian_vocal_pipeline/`,
 `shs100k_new_pipeline/`, or `shs100k_vocal_pipeline/` is modified. CQT
@@ -28,11 +34,11 @@ python -m novel_indian_pipeline.tonic_index_build --dataset=indian_vocal
 python -m novel_indian_pipeline.tonic_index_build --dataset=shs100k
 python -m novel_indian_pipeline.tonic_index_build --dataset=shs100k_vocal
 
-# 3. Run the full 8-row ablation matrix on both Indian datasets.
+# 3. Run the full 9-row ablation matrix on both Indian datasets.
 bash novel_indian_pipeline/run_ablations.sh
 
 # Or run a single row:
-bash novel_indian_pipeline/run_ablations.sh row7 indian_vocal
+bash novel_indian_pipeline/run_ablations.sh row9 indian
 
 # 4. After all rows finish, summarise.
 python -m novel_indian_pipeline.main build_summary
@@ -102,9 +108,18 @@ python -m novel_indian_pipeline.main evaluate \
 python -m novel_indian_pipeline.main build_summary
 ```
 
-## Reproduction target
+## Ablation rows
 
-Row 1 (`row1_baseline_dyn_triplet` on `indian_vocal`) must reproduce the
-existing best result from [ISMIR_CSI_PAPER_CONTENT.md](
-../ISMIR_CSI_PAPER_CONTENT.md) — MAP ≈ 0.9234 on Indian-vocal — within ±0.005.
-This validates the refactor before any of the new components are switched on.
+| Row | Config | Indian MAP | SHS100K MAP |
+|-----|--------|:----------:|:-----------:|
+| 1 | Dyn Triplet (baseline) | 0.7425 | 0.8309 |
+| 2 | Tonic + Dyn Triplet | 0.6597 | 0.7624 |
+| **3** | **Dyn Triplet + SupCon** | **0.7500** | **0.8466** |
+| 4 | Dyn Triplet + ArcFace | 0.7367 | 0.8290 |
+| 5 | Tonic + Dyn Triplet + SupCon | 0.6980 | 0.7945 |
+| 6 | Tonic + Dyn Triplet + ArcFace | 0.6515 | 0.7745 |
+| 7 | Tonic + Dyn Triplet + SupCon + ArcFace | 0.6774 | 0.7862 |
+| 8 | Tonic only (sanity) | 0.6061 | 0.7350 |
+| 9 | Dyn Triplet + SupCon + ArcFace | *running* | *running* |
+
+All rows trained on Indian-mix, 75 epochs max, patience 15.

@@ -246,12 +246,12 @@ def train(
     arcface_margin: float = 0.3,
     arcface_scale: float = 30.0,
     num_ce_epochs: int = 0,
-    num_dyn_epochs: int = 150,
+    num_dyn_epochs: int = 75,
     nsim_refresh_interval: int = 3,
     batch_size: int = 64,
     num_workers: int = 2,
     lr: float = 5e-5,
-    patience: int = 25,
+    patience: int = 15,
     min_delta: float = 0.002,
 ):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

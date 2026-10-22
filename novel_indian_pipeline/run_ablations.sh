@@ -1,5 +1,5 @@
 #!/bin/bash
-# 8-row ablation matrix for the novel Indian CSI pipeline.
+# 9-row ablation matrix for the novel Indian CSI pipeline.
 #
 # Each row trains TWO models — one on Indian-mix, one on Indian-vocal — then
 # evaluates each on all four test manifests. Output goes to
@@ -15,7 +15,7 @@
 #      uses the rotated CQT for those rows).
 #
 # Usage:
-#   bash novel_indian_pipeline/run_ablations.sh           # run all 8 rows on both datasets
+#   bash novel_indian_pipeline/run_ablations.sh           # run all 9 rows on both datasets
 #   bash novel_indian_pipeline/run_ablations.sh row1      # run row 1 only
 #   bash novel_indian_pipeline/run_ablations.sh row7 indian_vocal   # run row 7 on vocal only
 #
@@ -82,6 +82,8 @@ for DS in indian indian_vocal; do
     run row7_full "$DS" --tonic_normalize=True --use_supcon=True --use_arcface=True
     # Row 8: tonic only, no dyn-triplet (sanity)
     run row8_tonic_only "$DS" --tonic_normalize=True --use_dyn_triplet=False
+    # Row 9: dyn-triplet + supcon + arcface (no tonic) — fills the missing cell
+    run row9_dyn_triplet_supcon_arcface "$DS" --use_supcon=True --use_arcface=True
 done
 
 echo ""

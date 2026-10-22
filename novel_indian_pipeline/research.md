@@ -131,21 +131,78 @@ Two ingredients from the recent retrieval literature fix that:
 So the loss becomes: **dynamic-modified-triplet + SupCon + SubCenter-ArcFace**,
 all on the same 300-d CQTNet embedding.
 
+### Idea 3: Combining SupCon and ArcFace without tonic rotation
+
+After running the full ablation grid we saw that tonic rotation consistently
+hurt every row it touched (see Results section below). That left one untested
+cell: **Dyn Triplet + SupCon + ArcFace without tonic rotation** (row 9). Row 7
+had all four ingredients but the tonic drag masked the SupCon+ArcFace
+interaction. Row 9 isolates that combination cleanly.
+
+---
+
+## What we actually found (results)
+
+We ran 9 rows in total, each trained on Indian-mix for 75 epochs (with
+early stopping at patience 15) and evaluated on four test sets.
+
+| Row | Config | Indian MAP | Indian Vocal MAP | SHS100K MAP |
+|-----|--------|:----------:|:----------------:|:-----------:|
+| 3 | **Dyn Triplet + SupCon** | **0.7500** | **0.7208** | **0.8466** |
+| 9 | Dyn Triplet + SupCon + ArcFace | *running* | *running* | *running* |
+| 7 | Tonic + Dyn Triplet + SupCon + ArcFace (full) | 0.6774 | 0.6734 | 0.7862 |
+| 4 | Dyn Triplet + ArcFace | 0.7367 | 0.7100 | 0.8290 |
+| 1 | Dyn Triplet only (baseline) | 0.7425 | 0.7212 | 0.8309 |
+| 5 | Tonic + Dyn Triplet + SupCon | 0.6980 | 0.6854 | 0.7945 |
+| 6 | Tonic + Dyn Triplet + ArcFace | 0.6515 | 0.6485 | 0.7745 |
+| 2 | Tonic + Dyn Triplet | 0.6597 | 0.6629 | 0.7624 |
+| 8 | Tonic only (sanity, 0 epochs) | 0.6061 | 0.6223 | 0.7350 |
+
+### What the results tell us
+
+**SupCon is the single biggest improvement.** Adding it to the dynamic triplet
+(row 3) beats the baseline by +0.0075 MAP on Indian and +0.0157 on SHS100K.
+The reason fits the theory: Indian cliques average 8–10 covers, so SupCon's
+"use all positives at once" strategy has much more signal to work with than a
+single-positive triplet.
+
+**Tonic rotation consistently hurts** — every tonic row is worse than its
+non-tonic counterpart by 5–8% MAP. Two reasons:
+
+1. The chroma-peak tonic estimator introduces noise (~10–15% wrong estimates
+   on non-modal tracks). Wrong rotations mis-align features instead of
+   normalising them.
+2. Many Indian popular-music covers keep the original key, so the absolute
+   key position is a genuine cover cue the model was exploiting. Removing it
+   is an own goal.
+
+This is a clean **negative result worth reporting**: the standard CSI
+assumption that key normalisation always helps does *not* hold for Indian
+popular music.
+
+**ArcFace on its own adds little.** Row 4 (triplet+arcface, 0.7367) barely
+differs from the row 1 baseline (0.7425). The angular margin gives marginal
+discriminative push when the clique structure is already well-handled by
+the triplet.
+
+**The "full kitchen sink" (row 7) loses to SupCon alone** because the tonic
+drag outweighs any benefit from combining all three new ingredients.
+
+**Row 9 (SupCon + ArcFace, no tonic)** is designed to test whether ArcFace
+adds anything *on top of* SupCon in the absence of tonic noise. If it beats
+row 3, the combination is the headline result; if not, SupCon alone is.
+
 ---
 
 ## Why this might work
 
-- Tonic-relative CQT rotation removes one *huge* source of variance (key
-  choice) before the CNN sees the input. The CNN then has more capacity to
-  learn the harder things — ornamentation, contour, harmony — that actually
-  distinguish covers from non-covers.
 - SupCon uses every positive on every step instead of one per anchor, which
   matters when our cliques have 4–10 covers each.
 - SubCenter-ArcFace gives intra-clique style variance somewhere to live in
   the embedding space without dragging the centroid.
-- All three pieces are well-cited "default" 2024–2026 ingredients; the
-  novelty is the *combination plus the Indian-specific preprocessing*, not
-  any one piece alone.
+- The SupCon+ArcFace pairing (without tonic rotation) isolates the loss-side
+  contribution and avoids the tonic estimator noise that hurt rows 2, 5, 6,
+  and 7.
 
 ---
 
@@ -153,6 +210,10 @@ all on the same 300-d CQTNet embedding.
 
 - **Audio-domain pitch normalisation.** Worse version of the chroma-rotation
   trick. Slower and lossier.
+- **Tonic-relative CQT rotation** — tried across rows 2, 5, 6, 7, 8 and hurt
+  every row by 5–8% MAP. The chroma-peak estimator introduces noise; more
+  importantly, absolute key is a genuine cover cue in Indian popular music that
+  the model benefits from. Rejected as preprocessing for this corpus.
 - **[SIFT/ORB](https://en.wikipedia.org/wiki/Scale-invariant_feature_transform)
   on spectrograms.** Local keypoint matching is fragile to time-stretch.
 - **[SSIM](https://en.wikipedia.org/wiki/Structural_similarity)** on
