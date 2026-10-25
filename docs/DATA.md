@@ -7,6 +7,7 @@ pinned, and remote-only. Never infer experimental membership from the HF viewer.
 |---|---|---|
 | Audio/metadata | `rojin254/PP4-indian-music-csi` | `973478c5b13ee5dcd153222289d867a4cc182abd` |
 | Earlier weights | `rojin254/PP4-CQTNet-checkpoints` | `5ae4cbfb60fb798c0c5c1854503f23bc543bc7f8` |
+| Recovered raw weights, `old_checkpoints/` | `rojin254/PP4-indian-music-csi` | `e470ba796383b1c025a63cbe7f7016e791537e67` |
 
 `data fetch --file` requires exact filenames (repeat the flag); no glob or
 implicit full snapshot is allowed. Each subset gets a checksum/byte-count ledger
@@ -39,6 +40,17 @@ The small versionable [recovery manifest](../data/metadata/recovered_checkpoints
 records original paths, Git blob IDs, SHA-256 checksums, sizes, naming evidence,
 warnings and CPU validation results. Paths in that manifest are relative to the
 project root. Total recovered weights: approximately 177.15 MiB.
+
+At the user's request, all nine unchanged checkpoints and that manifest were
+published to the existing dataset repository under
+[`old_checkpoints/`](https://huggingface.co/datasets/rojin254/PP4-indian-music-csi/tree/e470ba796383b1c025a63cbe7f7016e791537e67/old_checkpoints),
+in immutable commit
+[`e470ba796383b1c025a63cbe7f7016e791537e67`](https://huggingface.co/datasets/rojin254/PP4-indian-music-csi/commit/e470ba796383b1c025a63cbe7f7016e791537e67).
+Remote file sizes and LFS SHA-256/Git blob hashes were verified after publication.
+Repository visibility was not changed. The existing audio snapshot remains pinned
+to its earlier revision; the default `data fetch --asset dataset` does not include
+this subsequently added checkpoint folder. Use the pinned archive link above for
+these weights rather than assuming they exist in the older audio snapshot.
 
 All nine load with `weights_only=True`, contain finite tensors, pass strict
 backbone/classifier loading without replacing any tensors, and produce finite
