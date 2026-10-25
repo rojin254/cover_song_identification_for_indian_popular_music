@@ -14,6 +14,58 @@ with requested files, revision, successes and HTTP failures. Partial failure
 returns an error, not success. Recorded checksums establish downloaded bytes,
 not experimental provenance or audio completeness. No uploads are implemented.
 
+## Recovered historical checkpoints
+
+On 2026-10-25, the following nine user-selected checkpoints were recovered
+directly from local Git commit
+`4a636cf0944e7c6b60f838845b8073fafb06ee59`. They live in
+`data/checkpoints/recovered/`, which remains gitignored. Recovery preserves
+the original bytes: these are renamed copies, not converted or retrained models.
+No network download or GPU was needed.
+
+| # | Original name under historical `check_points/` | Recovered name |
+|---|---|---|
+| 1 | `cqtnet_indian_best.pth` | `indian_mix_cqtnet_finetuned_best.pth` |
+| 2 | `cqtnet_shs100k_best.pth` | `shs100k_mix_cqtnet_finetuned_on_test_best.pth` |
+| 3 | `CQTNet_indian_dyn_triplet_best_indian_fin_map76.pth` | `indian_mix_dynamic_modified_triplet_best.pth` |
+| 4 | `CQTNet_indian_vocal_ce_best_indian_vocal_20260430_201641.pth` | `indian_vocal_ce_best.pth` |
+| 5 | `CQTNet_indian_vocal_dyn_triplet_best_vocal_dyn_triplet_ce201641_full.pth` | `indian_vocal_dynamic_modified_triplet_best.pth` |
+| 6 | `CQTNet_shs100k_vocal_triplet_best_shs100k_vocal_20260502_203445.pth` | `shs100k_vocal_triplet_best.pth` |
+| 7 | `CQTNet_shs100k_vocal_dyn_triplet_best_shs100k_vocal_20260502_203445.pth` | `shs100k_vocal_dynamic_modified_triplet_best.pth` |
+| 8 | `CQTNet_shs100k_vocal_ce_best_shs100k_vocal_20260502_191055.pth` | `shs100k_vocal_ce_best.pth` |
+| 9 | `CQTNet_shs100k_mod_triplet_best_shs100k_20260502_184211.pth` | `shs100k_mix_modified_triplet_best.pth` |
+
+The small versionable [recovery manifest](../data/metadata/recovered_checkpoints.json)
+records original paths, Git blob IDs, SHA-256 checksums, sizes, naming evidence,
+warnings and CPU validation results. Paths in that manifest are relative to the
+project root. Total recovered weights: approximately 177.15 MiB.
+
+All nine load with `weights_only=True`, contain finite tensors, pass strict
+backbone/classifier loading without replacing any tensors, and produce finite
+300-dimensional embeddings on CPU. Indian heads have 402 classes; SHS heads
+have 92. Matching head size does **not** prove matching clique label order,
+preprocessing, original validation membership or final-report lineage.
+These weight-only assets support explicit `--init`, not full-state `--resume`.
+If the new training label space differs, explicitly request
+`model.replace_classifier=true`; do not silently reuse an unverified classifier
+mapping.
+
+User-confirmed provenance:
+
+- Checkpoint 1 is base CQTNet fine-tuned on the Indian **training** set.
+- Checkpoint 2 is base CQTNet fine-tuned on the SHS100K **test** set. Its new name
+  deliberately exposes that fact. Do not use it to claim unbiased performance
+  on that test set.
+- Historical SHS vocal CE source defaults to checkpoint 2 as its initializer.
+  The actual initialization of checkpoints 6-8 is unverified, so inherited test
+  exposure must be investigated rather than assumed absent.
+
+Names preserve the apparent dataset, modality and stage without inventing
+missing facts: checkpoint 9 remains `modified_triplet` rather than asserting
+static/dynamic selection, and the old checkpoint 3 `map76` suffix is not a
+newly measured result. No Phase 1 R9 checkpoint was included in this recovery;
+Phase 2/3 still require an explicitly verified R9 initializer.
+
 ## Folder mapping
 
 Fetch dataset paths into `data/audio`, preserving their remote relative paths:

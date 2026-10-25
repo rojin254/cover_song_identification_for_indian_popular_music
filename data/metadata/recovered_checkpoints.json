@@ -1,0 +1,574 @@
+{
+  "checkpoint_count": 9,
+  "checkpoints": [
+    {
+      "bytes": 20844389,
+      "cpu_validation": {
+        "additional_forward_checks": [
+          {
+            "embedding_shape": [
+              1,
+              300
+            ],
+            "finite_outputs": true,
+            "input_shape": [
+              1,
+              1,
+              84,
+              400
+            ],
+            "logits_shape": [
+              1,
+              402
+            ]
+          }
+        ],
+        "all_tensors_finite": true,
+        "classifier_classes": 402,
+        "classifier_replaced": false,
+        "embedding_shape": [
+          1,
+          300
+        ],
+        "finite_outputs": true,
+        "input_shape": [
+          1,
+          1,
+          84,
+          200
+        ],
+        "key_normalization_events": [],
+        "logits_shape": [
+          1,
+          402
+        ],
+        "strict_model_load": true,
+        "tensor_count": 64,
+        "weights_only_load": true
+      },
+      "dataset": "indian",
+      "git_blob": "fe353a088477a5254fa4f2690240857f5ad0439d",
+      "historical_reproduction_verified": false,
+      "label_map_verified": false,
+      "modality": "mix",
+      "notes": "User-confirmed: base CQTNet fine-tuned on Indian training data.",
+      "original_filename": "cqtnet_indian_best.pth",
+      "recovered_path": "data/checkpoints/recovered/indian_mix_cqtnet_finetuned_best.pth",
+      "resume_supported": false,
+      "sha256": "9aab3dbc4d2cedf7d4ad1f0f3a01e11e9e87605d888da45606c1af55f81c4bd8",
+      "source_commit": "4a636cf0944e7c6b60f838845b8073fafb06ee59",
+      "source_path": "check_points/cqtnet_indian_best.pth",
+      "stage_label": "finetuned",
+      "stage_label_basis": "user clarification and historical filename/source, not an independently recovered run configuration",
+      "training_partition": "train",
+      "unbiased_benchmark_use_verified": false
+    },
+    {
+      "bytes": 20471211,
+      "cpu_validation": {
+        "additional_forward_checks": [
+          {
+            "embedding_shape": [
+              1,
+              300
+            ],
+            "finite_outputs": true,
+            "input_shape": [
+              1,
+              1,
+              84,
+              400
+            ],
+            "logits_shape": [
+              1,
+              92
+            ]
+          }
+        ],
+        "all_tensors_finite": true,
+        "classifier_classes": 92,
+        "classifier_replaced": false,
+        "embedding_shape": [
+          1,
+          300
+        ],
+        "finite_outputs": true,
+        "input_shape": [
+          1,
+          1,
+          84,
+          200
+        ],
+        "key_normalization_events": [],
+        "logits_shape": [
+          1,
+          92
+        ],
+        "strict_model_load": true,
+        "tensor_count": 64,
+        "weights_only_load": true
+      },
+      "dataset": "shs100k",
+      "git_blob": "db4530f0478caaca362b528305184c4f6717cb4b",
+      "historical_reproduction_verified": false,
+      "label_map_verified": false,
+      "modality": "mix",
+      "notes": "User-confirmed: fine-tuned on SHS100K test data. Not an unbiased SHS100K test initializer.",
+      "original_filename": "cqtnet_shs100k_best.pth",
+      "recovered_path": "data/checkpoints/recovered/shs100k_mix_cqtnet_finetuned_on_test_best.pth",
+      "resume_supported": false,
+      "sha256": "83a836351740f5e066326e85bedd01914e6553c2ecdb2c95dd456b7d8762f7fb",
+      "source_commit": "4a636cf0944e7c6b60f838845b8073fafb06ee59",
+      "source_path": "check_points/cqtnet_shs100k_best.pth",
+      "stage_label": "finetuned",
+      "stage_label_basis": "user clarification and historical filename/source, not an independently recovered run configuration",
+      "training_partition": "test",
+      "unbiased_benchmark_use_verified": false
+    },
+    {
+      "bytes": 20847095,
+      "cpu_validation": {
+        "additional_forward_checks": [
+          {
+            "embedding_shape": [
+              1,
+              300
+            ],
+            "finite_outputs": true,
+            "input_shape": [
+              1,
+              1,
+              84,
+              400
+            ],
+            "logits_shape": [
+              1,
+              402
+            ]
+          }
+        ],
+        "all_tensors_finite": true,
+        "classifier_classes": 402,
+        "classifier_replaced": false,
+        "embedding_shape": [
+          1,
+          300
+        ],
+        "finite_outputs": true,
+        "input_shape": [
+          1,
+          1,
+          84,
+          200
+        ],
+        "key_normalization_events": [],
+        "logits_shape": [
+          1,
+          402
+        ],
+        "strict_model_load": true,
+        "tensor_count": 64,
+        "weights_only_load": true
+      },
+      "dataset": "indian",
+      "git_blob": "2e6d260032796619110e0ed6c648763b25838a21",
+      "historical_reproduction_verified": false,
+      "label_map_verified": false,
+      "modality": "mix",
+      "notes": "Original map76 suffix is a historical filename hint, not a newly measured MAP.",
+      "original_filename": "CQTNet_indian_dyn_triplet_best_indian_fin_map76.pth",
+      "recovered_path": "data/checkpoints/recovered/indian_mix_dynamic_modified_triplet_best.pth",
+      "resume_supported": false,
+      "sha256": "07fb2eaf58028f660ce0e08aba3c94988d46f5b2e1e5b651cb5e7f98ac8836b9",
+      "source_commit": "4a636cf0944e7c6b60f838845b8073fafb06ee59",
+      "source_path": "check_points/CQTNet_indian_dyn_triplet_best_indian_fin_map76.pth",
+      "stage_label": "dynamic_modified_triplet",
+      "stage_label_basis": "user clarification and historical filename/source, not an independently recovered run configuration",
+      "training_partition": "unverified",
+      "unbiased_benchmark_use_verified": false
+    },
+    {
+      "bytes": 20847369,
+      "cpu_validation": {
+        "additional_forward_checks": [
+          {
+            "embedding_shape": [
+              1,
+              300
+            ],
+            "finite_outputs": true,
+            "input_shape": [
+              1,
+              1,
+              84,
+              400
+            ],
+            "logits_shape": [
+              1,
+              402
+            ]
+          }
+        ],
+        "all_tensors_finite": true,
+        "classifier_classes": 402,
+        "classifier_replaced": false,
+        "embedding_shape": [
+          1,
+          300
+        ],
+        "finite_outputs": true,
+        "input_shape": [
+          1,
+          1,
+          84,
+          200
+        ],
+        "key_normalization_events": [],
+        "logits_shape": [
+          1,
+          402
+        ],
+        "strict_model_load": true,
+        "tensor_count": 64,
+        "weights_only_load": true
+      },
+      "dataset": "indian",
+      "git_blob": "f222fa7b35be675337141f6804f6aa18c6fe1a5f",
+      "historical_reproduction_verified": false,
+      "label_map_verified": false,
+      "modality": "vocal",
+      "notes": "Original run identifier: 20260430_201641.",
+      "original_filename": "CQTNet_indian_vocal_ce_best_indian_vocal_20260430_201641.pth",
+      "recovered_path": "data/checkpoints/recovered/indian_vocal_ce_best.pth",
+      "resume_supported": false,
+      "sha256": "b90e79783fc100c603201b1da8707bf1a988f7411b1cf378fe4beb5220fa24a7",
+      "source_commit": "4a636cf0944e7c6b60f838845b8073fafb06ee59",
+      "source_path": "check_points/CQTNet_indian_vocal_ce_best_indian_vocal_20260430_201641.pth",
+      "stage_label": "ce",
+      "stage_label_basis": "user clarification and historical filename/source, not an independently recovered run configuration",
+      "training_partition": "unverified",
+      "unbiased_benchmark_use_verified": false
+    },
+    {
+      "bytes": 20849105,
+      "cpu_validation": {
+        "additional_forward_checks": [
+          {
+            "embedding_shape": [
+              1,
+              300
+            ],
+            "finite_outputs": true,
+            "input_shape": [
+              1,
+              1,
+              84,
+              400
+            ],
+            "logits_shape": [
+              1,
+              402
+            ]
+          }
+        ],
+        "all_tensors_finite": true,
+        "classifier_classes": 402,
+        "classifier_replaced": false,
+        "embedding_shape": [
+          1,
+          300
+        ],
+        "finite_outputs": true,
+        "input_shape": [
+          1,
+          1,
+          84,
+          200
+        ],
+        "key_normalization_events": [],
+        "logits_shape": [
+          1,
+          402
+        ],
+        "strict_model_load": true,
+        "tensor_count": 64,
+        "weights_only_load": true
+      },
+      "dataset": "indian",
+      "git_blob": "8d0dcf509ac5d7cf54bc1f4b2f9359ad0816a3c6",
+      "historical_reproduction_verified": false,
+      "label_map_verified": false,
+      "modality": "vocal",
+      "notes": "Original filename marks the ce201641 full run; complete initialization lineage is unverified.",
+      "original_filename": "CQTNet_indian_vocal_dyn_triplet_best_vocal_dyn_triplet_ce201641_full.pth",
+      "recovered_path": "data/checkpoints/recovered/indian_vocal_dynamic_modified_triplet_best.pth",
+      "resume_supported": false,
+      "sha256": "f1911a90bf31488896ff42373ecf5584fbc0499a4bdb9d8e82cd00b2de812b67",
+      "source_commit": "4a636cf0944e7c6b60f838845b8073fafb06ee59",
+      "source_path": "check_points/CQTNet_indian_vocal_dyn_triplet_best_vocal_dyn_triplet_ce201641_full.pth",
+      "stage_label": "dynamic_modified_triplet",
+      "stage_label_basis": "user clarification and historical filename/source, not an independently recovered run configuration",
+      "training_partition": "unverified",
+      "unbiased_benchmark_use_verified": false
+    },
+    {
+      "bytes": 20475251,
+      "cpu_validation": {
+        "additional_forward_checks": [
+          {
+            "embedding_shape": [
+              1,
+              300
+            ],
+            "finite_outputs": true,
+            "input_shape": [
+              1,
+              1,
+              84,
+              400
+            ],
+            "logits_shape": [
+              1,
+              92
+            ]
+          }
+        ],
+        "all_tensors_finite": true,
+        "classifier_classes": 92,
+        "classifier_replaced": false,
+        "embedding_shape": [
+          1,
+          300
+        ],
+        "finite_outputs": true,
+        "input_shape": [
+          1,
+          1,
+          84,
+          200
+        ],
+        "key_normalization_events": [],
+        "logits_shape": [
+          1,
+          92
+        ],
+        "strict_model_load": true,
+        "tensor_count": 64,
+        "weights_only_load": true
+      },
+      "dataset": "shs100k",
+      "git_blob": "e6923afe5b0fa2d7008707890fa25b85ccbfd86f",
+      "historical_reproduction_verified": false,
+      "label_map_verified": false,
+      "modality": "vocal",
+      "notes": "Original run identifier: 20260502_203445. Potential inherited SHS test exposure needs lineage verification.",
+      "original_filename": "CQTNet_shs100k_vocal_triplet_best_shs100k_vocal_20260502_203445.pth",
+      "recovered_path": "data/checkpoints/recovered/shs100k_vocal_triplet_best.pth",
+      "resume_supported": false,
+      "sha256": "bb347211e83e42114050bd2aeef56f93306ed019b549e10f8bf15a13bfffe86d",
+      "source_commit": "4a636cf0944e7c6b60f838845b8073fafb06ee59",
+      "source_path": "check_points/CQTNet_shs100k_vocal_triplet_best_shs100k_vocal_20260502_203445.pth",
+      "stage_label": "triplet",
+      "stage_label_basis": "user clarification and historical filename/source, not an independently recovered run configuration",
+      "training_partition": "unverified",
+      "unbiased_benchmark_use_verified": false
+    },
+    {
+      "bytes": 20475723,
+      "cpu_validation": {
+        "additional_forward_checks": [
+          {
+            "embedding_shape": [
+              1,
+              300
+            ],
+            "finite_outputs": true,
+            "input_shape": [
+              1,
+              1,
+              84,
+              400
+            ],
+            "logits_shape": [
+              1,
+              92
+            ]
+          }
+        ],
+        "all_tensors_finite": true,
+        "classifier_classes": 92,
+        "classifier_replaced": false,
+        "embedding_shape": [
+          1,
+          300
+        ],
+        "finite_outputs": true,
+        "input_shape": [
+          1,
+          1,
+          84,
+          200
+        ],
+        "key_normalization_events": [],
+        "logits_shape": [
+          1,
+          92
+        ],
+        "strict_model_load": true,
+        "tensor_count": 64,
+        "weights_only_load": true
+      },
+      "dataset": "shs100k",
+      "git_blob": "20c8ce4f6479ded8c459a33ab83b85a1195666e4",
+      "historical_reproduction_verified": false,
+      "label_map_verified": false,
+      "modality": "vocal",
+      "notes": "Original run identifier: 20260502_203445. Potential inherited SHS test exposure needs lineage verification.",
+      "original_filename": "CQTNet_shs100k_vocal_dyn_triplet_best_shs100k_vocal_20260502_203445.pth",
+      "recovered_path": "data/checkpoints/recovered/shs100k_vocal_dynamic_modified_triplet_best.pth",
+      "resume_supported": false,
+      "sha256": "09b12675957d1db9e918668d23926fd7b61403e80316bb086fd226152ec8f946",
+      "source_commit": "4a636cf0944e7c6b60f838845b8073fafb06ee59",
+      "source_path": "check_points/CQTNet_shs100k_vocal_dyn_triplet_best_shs100k_vocal_20260502_203445.pth",
+      "stage_label": "dynamic_modified_triplet",
+      "stage_label_basis": "user clarification and historical filename/source, not an independently recovered run configuration",
+      "training_partition": "unverified",
+      "unbiased_benchmark_use_verified": false
+    },
+    {
+      "bytes": 20474261,
+      "cpu_validation": {
+        "additional_forward_checks": [
+          {
+            "embedding_shape": [
+              1,
+              300
+            ],
+            "finite_outputs": true,
+            "input_shape": [
+              1,
+              1,
+              84,
+              400
+            ],
+            "logits_shape": [
+              1,
+              92
+            ]
+          }
+        ],
+        "all_tensors_finite": true,
+        "classifier_classes": 92,
+        "classifier_replaced": false,
+        "embedding_shape": [
+          1,
+          300
+        ],
+        "finite_outputs": true,
+        "input_shape": [
+          1,
+          1,
+          84,
+          200
+        ],
+        "key_normalization_events": [],
+        "logits_shape": [
+          1,
+          92
+        ],
+        "strict_model_load": true,
+        "tensor_count": 64,
+        "weights_only_load": true
+      },
+      "dataset": "shs100k",
+      "git_blob": "b9028d35d4a192be70d253c0d2e8f5408d295730",
+      "historical_reproduction_verified": false,
+      "label_map_verified": false,
+      "modality": "vocal",
+      "notes": "Original run identifier: 20260502_191055. Historical SHS vocal CE code defaults to the test-exposed base; actual run lineage remains unverified.",
+      "original_filename": "CQTNet_shs100k_vocal_ce_best_shs100k_vocal_20260502_191055.pth",
+      "recovered_path": "data/checkpoints/recovered/shs100k_vocal_ce_best.pth",
+      "resume_supported": false,
+      "sha256": "ac91c390f7d93d8785c8e35b8901a7618e08fb09f85a5412e755541825005f99",
+      "source_commit": "4a636cf0944e7c6b60f838845b8073fafb06ee59",
+      "source_path": "check_points/CQTNet_shs100k_vocal_ce_best_shs100k_vocal_20260502_191055.pth",
+      "stage_label": "ce",
+      "stage_label_basis": "user clarification and historical filename/source, not an independently recovered run configuration",
+      "training_partition": "unverified",
+      "unbiased_benchmark_use_verified": false
+    },
+    {
+      "bytes": 20474051,
+      "cpu_validation": {
+        "additional_forward_checks": [
+          {
+            "embedding_shape": [
+              1,
+              300
+            ],
+            "finite_outputs": true,
+            "input_shape": [
+              1,
+              1,
+              84,
+              400
+            ],
+            "logits_shape": [
+              1,
+              92
+            ]
+          }
+        ],
+        "all_tensors_finite": true,
+        "classifier_classes": 92,
+        "classifier_replaced": false,
+        "embedding_shape": [
+          1,
+          300
+        ],
+        "finite_outputs": true,
+        "input_shape": [
+          1,
+          1,
+          84,
+          200
+        ],
+        "key_normalization_events": [],
+        "logits_shape": [
+          1,
+          92
+        ],
+        "strict_model_load": true,
+        "tensor_count": 64,
+        "weights_only_load": true
+      },
+      "dataset": "shs100k",
+      "git_blob": "b316e8325b4a20f6f7280adab5a2d72008641b68",
+      "historical_reproduction_verified": false,
+      "label_map_verified": false,
+      "modality": "mix",
+      "notes": "Original run identifier: 20260502_184211. Static/dynamic policy is not established by the filename alone.",
+      "original_filename": "CQTNet_shs100k_mod_triplet_best_shs100k_20260502_184211.pth",
+      "recovered_path": "data/checkpoints/recovered/shs100k_mix_modified_triplet_best.pth",
+      "resume_supported": false,
+      "sha256": "65aaebdd586de557d5d19c2aabd3af8bb2272dbee5040bd2359671d6a1a71219",
+      "source_commit": "4a636cf0944e7c6b60f838845b8073fafb06ee59",
+      "source_path": "check_points/CQTNet_shs100k_mod_triplet_best_shs100k_20260502_184211.pth",
+      "stage_label": "modified_triplet",
+      "stage_label_basis": "user clarification and historical filename/source, not an independently recovered run configuration",
+      "training_partition": "unverified",
+      "unbiased_benchmark_use_verified": false
+    }
+  ],
+  "method": "local_git_blob_extraction_no_reserialization",
+  "recovered_at": "2026-10-25T11:45:13.236957+00:00",
+  "schema_version": 1,
+  "source_commit": "4a636cf0944e7c6b60f838845b8073fafb06ee59",
+  "total_bytes": 185758455,
+  "validation_runtime": {
+    "device": "cpu",
+    "threads": 2,
+    "torch": "2.14.1+cpu"
+  },
+  "warning": "Recovered weights are explicit warm starts/evaluation assets, not full toolkit resume states. Label maps, exact final-report lineage and dataset membership remain unverified. The SHS mix fine-tuned-on-test base is test-exposed; downstream SHS vocal exposure is possible and must be checked."
+}

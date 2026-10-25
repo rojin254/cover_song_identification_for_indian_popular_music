@@ -86,3 +86,6 @@ complete dataset/checkpoint recovery, historical audio-runtime parity and
 full report reruns remain unverified. Reference metrics and unresolved settings
 are labeled explicitly. No full dataset download, paid compute, full training
 suite, upload, commit or push is performed automatically.
+
+Nine selected historical checkpoints have been recovered locally, renamed and
+CPU-checked. See the [checkpoint mapping and test-exposure warnings](docs/DATA.md#recovered-historical-checkpoints).

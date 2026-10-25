@@ -78,6 +78,12 @@ For a specifically selected historical file, `git show
 content without restoring the legacy tree. Recovered weights belong under
 the ignored data checkpoint directories, not in the source tree.
 
+Nine user-selected historical checkpoints have subsequently been restored
+under `data/checkpoints/recovered/` with descriptive names and strict CPU
+compatibility checks. See the [mapping and provenance warnings](DATA.md#recovered-historical-checkpoints)
+and [checksum manifest](../data/metadata/recovered_checkpoints.json). The
+original binaries remain unchanged and gitignored.
+
 Cleanup and CPU smoke success do not establish GPU compatibility, original
 benchmark completeness or historical report reproduction; those checks remain
 outstanding.
