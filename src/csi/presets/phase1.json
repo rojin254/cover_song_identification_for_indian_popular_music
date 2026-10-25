@@ -1,0 +1,21 @@
+{
+  "phase1.r1": {
+    "aliases": ["R1", "C1"], "dependency": "prerequisites.modified_dynamic",
+    "config": {"model": {"dropout": 0.3, "freeze_conv0": true}},
+    "evidence": [
+      "Report settings; 10% validation is user-confirmed.",
+      "Reconstructed dropout after fc0; historical placement unverified.",
+      "Original anchors, cached negatives, seed 42 and ceil holdout are reconstructed choices.",
+      "SupCon temperature 0.07 and ArcFace weight 0.5 are pre-final observed defaults.",
+      "Historical checkpoint hashes, validation membership and long-run stopping overrides remain unverified."
+    ]
+  },
+  "phase1.r2": {"extends": "phase1.r1", "aliases": ["R2", "C2"], "dependency": "prerequisites.modified_dynamic", "config": {"preprocess": {"tonic": {"enabled": true}}}},
+  "phase1.r3": {"extends": "phase1.r1", "aliases": ["R3", "C3"], "dependency": "prerequisites.modified_dynamic", "config": {"objectives": {"supcon": {"weight": 0.5}}}},
+  "phase1.r4": {"extends": "phase1.r1", "aliases": ["R4", "C4"], "dependency": "prerequisites.modified_dynamic", "config": {"objectives": {"arcface": {"weight": 0.5}}}},
+  "phase1.r5": {"extends": "phase1.r3", "aliases": ["R5", "C5"], "dependency": "prerequisites.modified_dynamic", "config": {"preprocess": {"tonic": {"enabled": true}}}},
+  "phase1.r6": {"extends": "phase1.r4", "aliases": ["R6", "C6"], "dependency": "prerequisites.modified_dynamic", "config": {"preprocess": {"tonic": {"enabled": true}}}},
+  "phase1.r7": {"extends": "phase1.r5", "aliases": ["R7", "C7"], "dependency": "prerequisites.modified_dynamic", "config": {"objectives": {"arcface": {"weight": 0.5}}}},
+  "phase1.r8": {"extends": "phase1.r2", "aliases": ["R8", "C8"], "dependency": "prerequisites.modified_dynamic", "config": {"train": {"epochs": 0}, "objectives": {"modified_triplet": {"weight": 0.0}}}},
+  "phase1.r9": {"extends": "phase1.r3", "aliases": ["R9", "C9"], "dependency": "prerequisites.modified_dynamic", "config": {"objectives": {"arcface": {"weight": 0.5}}}}
+}

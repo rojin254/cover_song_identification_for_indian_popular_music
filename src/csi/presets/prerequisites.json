@@ -1,0 +1,24 @@
+{
+  "prerequisites.ce": {
+    "config": {"objectives": {"ce": {"weight": 1.0}, "modified_triplet": {"weight": 0.0}}},
+    "evidence": ["Reconstructed domain CE defaults; initializer must be explicitly recorded."]
+  },
+  "prerequisites.triplet": {
+    "config": {"objectives": {"triplet": {"weight": 1.0}, "modified_triplet": {"weight": 0.0}}, "model": {"freeze_conv0": true}},
+    "evidence": ["Source ordinary triplet uses Euclidean distance; cosine is an explicit alternative."]
+  },
+  "prerequisites.modified_static": {
+    "aliases": ["Timothee", "modified_static"],
+    "config": {
+      "train": {"epochs": 30, "patience": 15, "lr": 0.0001},
+      "negative": {"selection_refresh_epochs": null, "embedding_refresh_epochs": 8},
+      "model": {"freeze_conv0": true}
+    },
+    "evidence": ["Source-observed Indian static budget and refresh; Timothee is an alias, not an attribution."]
+  },
+  "prerequisites.modified_dynamic": {
+    "aliases": ["modified_dynamic"],
+    "config": {"train": {"epochs": 150, "patience": 25, "lr": 0.00005}, "model": {"freeze_conv0": true}},
+    "evidence": ["Source-observed Indian dynamic budget and three-epoch identity/embedding refresh."]
+  }
+}

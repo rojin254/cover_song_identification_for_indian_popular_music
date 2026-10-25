@@ -1,0 +1,12 @@
+{
+  "upstream.ce": {
+    "aliases": ["upstream"],
+    "evidence": ["Pinned upstream CQTNet; modern runtime parity must be tested separately."],
+    "config": {
+      "dataset": "shs100k", "profile": "upstream",
+      "preprocess": {"augmentation": true},
+      "objectives": {"ce": {"weight": 1.0}, "modified_triplet": {"weight": 0.0}},
+      "train": {"lr": 0.001, "weight_decay": 0.00001, "scheduler": "plateau", "min_lr": 0.000005}
+    }
+  }
+}

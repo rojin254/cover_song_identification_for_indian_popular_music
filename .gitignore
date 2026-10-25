@@ -34,6 +34,7 @@ htmlcov/
 
 # Virtual environments
 .venv/
+.venv-gpu/
 venv/
 env/
 ENV/
@@ -56,10 +57,15 @@ ENV/
 *.pid
 
 # Model checkpoints and other large training artifacts
-# check_points/
-# *.pth
-# *.pt
-# *.ckpt
+data/audio/
+data/features/
+data/cache/
+data/checkpoints/
+data/fixture/
+runs/
+*.pt
+*.pth
+*.ckpt
 
 # Generated CQT/features and other array dumps
 **/cqt_features/
@@ -74,8 +80,6 @@ data/test/
 *.flac
 *.m4a
 *.ogg
-*.npy
-# *.pth
 
 # Local OS files
 .DS_Store

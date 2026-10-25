@@ -1,0 +1,29 @@
+{
+  "status": "historical references, not newly measured results",
+  "column_order": ["indian.mix", "indian.vocal", "shs100k.mix", "shs100k.vocal"],
+  "principal_evidence": "User-supplied csi_rebuild_plan.md, 2026-10-25, section 7",
+  "principal": {
+    "phase1.r1": {"indian.mix": 0.7407, "indian.vocal": 0.7331, "shs100k.mix": 0.8689, "shs100k.vocal": 0.5580},
+    "phase1.r9": {"indian.mix": 0.7560, "indian.vocal": 0.7373, "shs100k.mix": 0.8707, "shs100k.vocal": 0.5579},
+    "phase3.e4_75": {"indian.mix": 0.7571, "indian.vocal": 0.7392, "shs100k.mix": 0.8716, "shs100k.vocal": 0.5590},
+    "phase3.e3_75": {"indian.mix": 0.7545, "indian.vocal": 0.7399, "shs100k.mix": 0.8702, "shs100k.vocal": 0.5498},
+    "phase3.e4_arc": {"indian.mix": 0.7510, "indian.vocal": 0.7369, "shs100k.mix": 0.8633, "shs100k.vocal": 0.5507},
+    "phase3.e3_arc": {"indian.mix": 0.7531, "indian.vocal": 0.7411, "shs100k.mix": 0.8700, "shs100k.vocal": 0.5519},
+    "phase3.e4_sup_low": {"indian.mix": 0.7645, "indian.vocal": 0.7463, "shs100k.mix": 0.8509, "shs100k.vocal": 0.5583}
+  },
+  "unrecovered_final_values": ["phase1.r2", "phase1.r3", "phase1.r4", "phase1.r5", "phase1.r6", "phase1.r7", "phase1.r8", "phase2.e0", "phase2.e1", "phase2.e2", "phase2.e2_bal", "phase2.e3", "phase2.e3b", "phase2.e4", "phase2.e5", "phase2.e6"],
+  "prerequisite_evidence": {
+    "source": "EXPERIMENT_AND_RESULTS_REPORT.md at 4a636cf0944e7c6b60f838845b8073fafb06ee59, lines 98-113",
+    "baseline_MAP": [0.7366, 0.6811, 0.8844, 0.5996],
+    "triplet_MAP": [0.7460, 0.7279, 0.8871, 0.5950],
+    "modified_MAP": [0.7620, 0.8043, 0.8839, 0.6717],
+    "conflict": "Same source line 163 reports SHS vocal modified MAP 0.6005 rather than 0.6717. Static/dynamic identity and initializer provenance are unresolved. These values are not bound to canonical presets."
+  },
+  "earlier_ablation_evidence": {
+    "source": "novel_indian_pipeline/results/ablation_matrix.md at 4a636cf0944e7c6b60f838845b8073fafb06ee59",
+    "r1_trained_indian_vocal_MAP": [0.5894847017959929, 0.6739573871597663, 0.8073798163590309, 0.4599639544818941],
+    "r2_trained_indian_mix_MAP": [0.6631866615656367, 0.6617461281470823, 0.7644610262149066, 0.4671129429540595],
+    "r2_trained_indian_vocal_MAP": [0.5297611213563961, 0.6259745082554325, 0.7369862844501996, 0.416055810716091],
+    "status": "Earlier non-final measurements, not substitutes for unrecovered final rows."
+  }
+}

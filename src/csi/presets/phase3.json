@@ -1,0 +1,7 @@
+{
+  "phase3.e4_75": {"extends": "phase2.e4", "aliases": ["E4_75", "F4"], "dependency": "phase1.r9", "config": {"train": {"epochs": 75}}},
+  "phase3.e3_75": {"extends": "phase2.e3", "aliases": ["E3_75", "F3"], "dependency": "phase1.r9", "config": {"train": {"epochs": 75}}},
+  "phase3.e4_arc": {"extends": "phase3.e4_75", "aliases": ["E4_arc", "F4_arc"], "dependency": "phase1.r9", "config": {"objectives": {"arcface": {"weight": 0.5}}}},
+  "phase3.e3_arc": {"extends": "phase3.e3_75", "aliases": ["E3_arc", "F3_arc"], "dependency": "phase1.r9", "config": {"objectives": {"arcface": {"weight": 0.5}}}},
+  "phase3.e4_sup_low": {"extends": "phase3.e4_75", "aliases": ["E4_sup_low", "F4_sup"], "dependency": "phase1.r9", "config": {"objectives": {"supcon": {"weight": 0.15}}}}
+}

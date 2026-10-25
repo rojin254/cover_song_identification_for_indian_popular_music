@@ -1,0 +1,11 @@
+{
+  "phase2.e0": {"extends": "phase1.r3", "aliases": ["E0", "S0"], "dependency": "phase1.r9", "config": {"train": {"epochs": 10, "lr": 0.00005}}},
+  "phase2.e1": {"extends": "phase2.e0", "aliases": ["E1", "S1"], "dependency": "phase1.r9", "config": {"sampler": {"kind": "balanced"}}},
+  "phase2.e2": {"extends": "phase2.e0", "aliases": ["E2", "S2"], "dependency": "phase1.r9", "config": {"objectives": {"supcon": {"weight": 0.0}, "modified_triplet": {"positive": "mean"}}}, "evidence": ["Mean-only coefficient reconstructed as 2*d_mean, pending historical verification."]},
+  "phase2.e2_bal": {"extends": "phase2.e2", "aliases": ["E2_bal", "S2b"], "dependency": "phase1.r9", "config": {"sampler": {"kind": "balanced"}}},
+  "phase2.e3": {"extends": "phase2.e0", "aliases": ["E3", "S3"], "dependency": "phase1.r9", "config": {"objectives": {"modified_triplet": {"positive": "hard"}}}, "evidence": ["Hard-only coefficient reconstructed as 2*d_hard, pending historical verification."]},
+  "phase2.e3b": {"extends": "phase2.e3", "aliases": ["E3b", "S3b"], "dependency": "phase1.r9", "config": {"objectives": {"supcon": {"weight": 0.0}}}, "evidence": ["E3b random batch policy is reconstructed, historically unverified."]},
+  "phase2.e4": {"extends": "phase2.e2_bal", "aliases": ["E4", "S4"], "dependency": "phase1.r9", "config": {"train": {"epochs": 20}, "objectives": {"modified_triplet": {"positive": "hard_mean"}}}, "evidence": ["20-epoch screening budget user-confirmed."]},
+  "phase2.e5": {"extends": "phase2.e4", "aliases": ["E5", "S5"], "dependency": "phase1.r9", "config": {"objectives": {"supcon": {"weight": 0.5}}}},
+  "phase2.e6": {"extends": "phase2.e3", "aliases": ["E6", "S6"], "dependency": "phase1.r9", "config": {"sampler": {"kind": "balanced"}}}
+}
